@@ -5,33 +5,31 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainCommand implements CommandExecutor {
-    private final ReloadPluginCommand reloadPluginCommand;
-    private final SetHealthCommand setHealthCommand;
-    private final ViewHealthCommand viewHealthCommand;
+    private final Map<String, CommandExecutor> subCommands = new HashMap<>();
 
     public MainCommand(DeathPulse plugin) {
-        this.reloadPluginCommand = new ReloadPluginCommand(plugin);
-        this.setHealthCommand = new SetHealthCommand(plugin);
-        this.viewHealthCommand = new ViewHealthCommand();
+        subCommands.put("reload", new ReloadPluginCommand(plugin));
+        subCommands.put("setHealth", new SetHealthCommand(plugin));
+        subCommands.put("viewHealth", new ViewHealthCommand());
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             sender.sendMessage("Please specify a subcommand.");
-            return true;
+            return false;
         }
 
-        String subCommand = args[0];
-        return switch (subCommand) {
-            case "reload" -> reloadPluginCommand.onCommand(sender, command, label, args);
-            case "setHealth" -> setHealthCommand.onCommand(sender, command, label, args);
-            case "viewHealth" -> viewHealthCommand.onCommand(sender, command, label, args);
-            default -> {
-                sender.sendMessage("Unknown subcommand.");
-                yield true;
-            }
-        };
+        CommandExecutor executor = subCommands.get(args[0].toLowerCase());
+        if (executor == null) {
+            sender.sendMessage("Unknown subcommand.");
+            return false;
+        }
+
+        return executor.onCommand(sender, command, label, args);
     }
 }

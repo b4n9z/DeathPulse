@@ -22,12 +22,20 @@ public class DeathPulse extends JavaPlugin implements CommandExecutor {
     public void onDisable() {
         getLogger().info("DeathPulse plugin disabled!");
     }
-
+    
     public DeathDataManager getDeathDataManager() {
+        if (deathDataManager == null) {
+            throw new IllegalStateException("DeathDataManager not initialized");
+        }
         return deathDataManager;
     }
 
-    public ConfigManager getConfigManager() { return configManager; }
+    public ConfigManager getConfigManager() {
+        if (configManager == null) {
+            throw new IllegalStateException("ConfigManager not initialized");
+        }
+        return configManager;
+    }
 
     public void loadConfigManager() {
         configManager = new ConfigManager(this);

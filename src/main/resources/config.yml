@@ -1,23 +1,23 @@
 # config.yml
 HP:
-  start: 20
+  start: 20 #Sart HP player
   gained:
     per_death: 2 #HP Gained per player death
     max:
-      enabled: false
-      amount: 114 #Max HP player
+      enabled: false #Max HP player, true or false, when true, player has max HP limit
+      amount: 114 #Max HP player limit
   decrease: #decrease HP player when death with certain type
-    enabled: false
+    enabled: false #true or false, when true, player can decrease their HP
     per_death: 2 #HP decrease per player death
     min: 2 #HP minimum player when always death with decrease type
 
 death:
-  must_difference: true
-  ignored:
+  must_difference: true #true or false, when true, player must die with different way to gained HP
+  ignored: #Ignored death type cause player not gain HP
   #  - lava
   #  - fall
   #  - player_attack
-  decrease:
+  decrease: #decrease HP player when death with certain type
   #  - lava
   #  - fall
   #  - player_attack

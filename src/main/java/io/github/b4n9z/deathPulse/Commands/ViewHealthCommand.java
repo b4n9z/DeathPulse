@@ -13,20 +13,19 @@ public class ViewHealthCommand implements CommandExecutor {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.viewHealth"))) {
                 sender.sendMessage("You do not have permission to use this command.");
-                return true;
+                return false;
             }
         }
 
         if (args.length != 1) {
             sender.sendMessage("Usage: /DeathPulse viewHealth <player>");
-            return true;
+            return false;
         }
 
         Player targetPlayer = Bukkit.getPlayer(args[0]);
-
         if (targetPlayer == null) {
             sender.sendMessage("Player not found or not online.");
-            return true;
+            return false;
         }
 
         double currentHealth = HealthManager.getHealth(targetPlayer);

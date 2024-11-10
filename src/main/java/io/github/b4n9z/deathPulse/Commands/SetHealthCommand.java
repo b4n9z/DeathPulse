@@ -20,19 +20,19 @@ public class SetHealthCommand implements CommandExecutor {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.setHealth"))) {
                 sender.sendMessage("You do not have permission to use this command.");
-                return true;
+                return false;
             }
         }
 
         if (args.length != 3) {
             sender.sendMessage("Usage: /DeathPulse setHealth <player> <amount>");
-            return true;
+            return false;
         }
 
-        Player target = Bukkit.getPlayer(args[1]);
-        if (target == null) {
+        Player targetPlayer = Bukkit.getPlayer(args[1]);
+        if (targetPlayer == null) {
             sender.sendMessage("Player not found.");
-            return true;
+            return false;
         }
 
         double newHealth;
@@ -40,7 +40,7 @@ public class SetHealthCommand implements CommandExecutor {
             newHealth = Double.parseDouble(args[2]);
         } catch (NumberFormatException e) {
             sender.sendMessage("Invalid health amount.");
-            return true;
+            return false;
         }
 
         if (newHealth > plugin.getConfigManager().getGainedMaxAmount()) {
@@ -51,9 +51,9 @@ public class SetHealthCommand implements CommandExecutor {
             return true;
         }
 
-        HealthManager.setMaxHealth(newHealth, target);
-        sender.sendMessage("Set " + target.getName() + "'s health to " + newHealth);
-        target.sendMessage("Your health has been set to " + newHealth + " by an admin.");
+        HealthManager.setMaxHealth(newHealth, targetPlayer);
+        sender.sendMessage("Set " + targetPlayer.getName() + "'s health to " + newHealth);
+        targetPlayer.sendMessage("Your health has been set to " + newHealth + " by an admin.");
         return true;
     }
 }
