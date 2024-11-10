@@ -1,0 +1,35 @@
+# config.yml
+HP:
+  start: 20
+  gained:
+    per_death: 2 #HP Gained per player death
+    max:
+      enabled: false
+      amount: 114 #Max HP player
+  decrease: #decrease HP player when death with certain type
+    enabled: false
+    per_death: 2 #HP decrease per player death
+    min: 2 #HP minimum player when always death with decrease type
+
+death:
+  must_difference: true
+  ignored:
+  #  - lava
+  #  - fall
+  #  - player_attack
+  decrease:
+  #  - lava
+  #  - fall
+  #  - player_attack
+
+notifications:
+  death_message:
+    player:
+      gained: "&fYou gained &9{gain}&f health cause : &c{cause}"
+      ifSameWay: "&cYou don't gained health with death same way"
+      ignored: "&fDied with &c{cause}&f not gained HP"
+      decrease: "&fYou decrease &c{decrease}&f health cause : &c{cause}"
+      maxHealth: "&fYou have reached the&c maximum health limit&f."
+    logServer:
+      gained: "{name} gained {gain} health by {cause}"
+      decrease: "{name} decrease {decrease} health cause : {cause}"

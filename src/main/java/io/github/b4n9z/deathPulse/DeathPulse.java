@@ -1,17 +1,50 @@
 package io.github.b4n9z.deathPulse;
 
+import io.github.b4n9z.deathPulse.Listeners.*;
+import io.github.b4n9z.deathPulse.Managers.*;
+import io.github.b4n9z.deathPulse.Commands.*;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class DeathPulse extends JavaPlugin {
+public class DeathPulse extends JavaPlugin implements CommandExecutor {
+    private DeathDataManager deathDataManager;
+    private ConfigManager configManager;
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
-
+        saveDefaultConfig();
+        loadConfigManager();
+        registerEventsAndCommands();
+        getLogger().info("DeathPulse plugin enabled!");
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        getLogger().info("DeathPulse plugin disabled!");
+    }
+
+    public DeathDataManager getDeathDataManager() {
+        return deathDataManager;
+    }
+
+    public ConfigManager getConfigManager() { return configManager; }
+
+    public void loadConfigManager() {
+        configManager = new ConfigManager(this);
+    }
+
+    private void registerEventsAndCommands() {
+        configManager = new ConfigManager(this); // Load config.yml
+        deathDataManager = new DeathDataManager(this);
+        //Register Events
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        //Register Command
+        CommandExecutor mainCommand = new MainCommand(this);
+        this.getCommand("DeathPulse").setExecutor(mainCommand);
+        this.getCommand("dp").setExecutor(mainCommand);
+        //Register Completer
+        this.getCommand("DeathPulse").setTabCompleter(new MainCommandCompleter());
+        this.getCommand("dp").setTabCompleter(new MainCommandCompleter());
     }
 }
