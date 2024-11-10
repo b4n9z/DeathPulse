@@ -48,12 +48,14 @@ public class DeathDataManager {
     }
 
     private void savePlayerDeaths(UUID playerUUID, Set<String> deathCauses) {
-        File file = new File(dataFolder, playerUUID.toString() + ".json");
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            File file = new File(dataFolder, playerUUID.toString() + ".json");
 
-        try (FileWriter writer = new FileWriter(file)) {
-            gson.toJson(deathCauses, writer);
-        } catch (IOException e) {
-            Bukkit.getLogger().severe("Failed to save death data for " + playerUUID);
-        }
+            try (FileWriter writer = new FileWriter(file)) {
+                gson.toJson(deathCauses, writer);
+            } catch (IOException e) {
+                Bukkit.getLogger().severe("Failed to save death data for " + playerUUID);
+            }
+        });
     }
 }

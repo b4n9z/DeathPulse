@@ -30,14 +30,14 @@ public class ConfigManager {
     }
 
     public void loadConfig() {
-        this.hpStart = plugin.getConfig().getInt("HP.start");
-        this.gainedPerDeath = plugin.getConfig().getInt("HP.gained.per_death");
-        this.gainedMaxEnabled = plugin.getConfig().getBoolean("HP.gained.max.enabled");
-        this.gainedMaxAmount = plugin.getConfig().getInt("HP.gained.max.amount");
-        this.decreaseEnabled = plugin.getConfig().getBoolean("HP.decrease.enabled");
-        this.decreasePerDeath = plugin.getConfig().getInt("HP.decrease.per_death");
-        this.decreaseMin = plugin.getConfig().getInt("HP.decrease.min");
-        this.deathMustDifference = plugin.getConfig().getBoolean("death.must_difference");
+        this.hpStart = plugin.getConfig().getInt("HP.start", 20);
+        this.gainedPerDeath = plugin.getConfig().getInt("HP.gained.per_death", 2);
+        this.gainedMaxEnabled = plugin.getConfig().getBoolean("HP.gained.max.enabled", false);
+        this.gainedMaxAmount = plugin.getConfig().getInt("HP.gained.max.amount", 114);
+        this.decreaseEnabled = plugin.getConfig().getBoolean("HP.decrease.enabled", false);
+        this.decreasePerDeath = plugin.getConfig().getInt("HP.decrease.per_death", 2);
+        this.decreaseMin = plugin.getConfig().getInt("HP.decrease.min", 2);
+        this.deathMustDifference = plugin.getConfig().getBoolean("death.must_difference", true);
         this.deathIgnored = plugin.getConfig().getStringList("death.ignored");
         this.decreaseCause = plugin.getConfig().getStringList("death.decrease");
         this.deathMessagePlayerGained = plugin.getConfig().getString("notifications.death_message.player.gained");
