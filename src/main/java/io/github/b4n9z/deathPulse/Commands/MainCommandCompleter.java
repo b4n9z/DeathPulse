@@ -24,6 +24,21 @@ public class MainCommandCompleter implements TabCompleter {
             if (sender.hasPermission("dp.viewHealth")) {
                 completions.add("viewHealth");
             }
+            if (sender.hasPermission("dp.setStartHealth")) {
+                completions.add("setStartHealth");
+            }
+            if (sender.hasPermission("dp.setGainedPerDeath")) {
+                completions.add("setGainedPerDeath");
+            }
+            if (sender.hasPermission("dp.setGainedMax")) {
+                completions.add("setGainedMax");
+            }
+            if (sender.hasPermission("dp.setDecrease")) {
+                completions.add("setDecrease");
+            }
+            if (sender.hasPermission("dp.help")) {
+                completions.add("help");
+            }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("setHealth")) {
             // Autocomplete player names
             for (Player player : Bukkit.getOnlinePlayers()) {
@@ -35,7 +50,6 @@ public class MainCommandCompleter implements TabCompleter {
                 completions.add(player.getName());
             }
         }
-
         return completions;
     }
 }

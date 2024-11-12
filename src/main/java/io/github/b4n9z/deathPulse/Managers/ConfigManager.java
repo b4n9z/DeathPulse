@@ -54,28 +54,63 @@ public class ConfigManager {
         return hpStart;
     }
 
+    public void setHpStart(int hpStart) {
+        plugin.getConfig().set("HP.start", hpStart);
+        this.hpStart = hpStart;
+    }
+
     public int getGainedPerDeath() {
         return gainedPerDeath;
+    }
+
+    public void setGainedPerDeath(int gainedPerDeath) {
+        plugin.getConfig().set("HP.gained.per_death", gainedPerDeath);
+        this.gainedPerDeath = gainedPerDeath;
     }
 
     public boolean isGainedMaxEnabled() {
         return gainedMaxEnabled;
     }
 
+    public void setGainedMaxEnabled(boolean gainedMaxEnabled) {
+        plugin.getConfig().set("HP.gained.max.enabled", gainedMaxEnabled);
+        this.gainedMaxEnabled = gainedMaxEnabled;
+    }
+
     public int getGainedMaxAmount() {
         return gainedMaxAmount;
+    }
+
+    public void setGainedMaxAmount(int gainedMaxAmount) {
+        plugin.getConfig().set("HP.gained.max.amount", gainedMaxAmount);
+        this.gainedMaxAmount = gainedMaxAmount;
     }
 
     public boolean isDecreaseEnabled() {
         return decreaseEnabled;
     }
 
+    public void setDecreaseEnabled(boolean decreaseEnabled) {
+        plugin.getConfig().set("HP.decrease.enabled", decreaseEnabled);
+        this.decreaseEnabled = decreaseEnabled;
+    }
+
     public int getDecreasePerDeath() {
         return decreasePerDeath;
     }
 
+    public void setDecreasePerDeath(int decreasePerDeath) {
+        plugin.getConfig().set("HP.decrease.per_death", decreasePerDeath);
+        this.decreasePerDeath = decreasePerDeath;
+    }
+
     public int getDecreaseMin() {
         return decreaseMin;
+    }
+
+    public void setDecreaseMin(int decreaseMin) {
+        plugin.getConfig().set("HP.decrease.min", decreaseMin);
+        this.decreaseMin = decreaseMin;
     }
 
     // Death settings

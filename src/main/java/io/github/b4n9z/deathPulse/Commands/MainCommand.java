@@ -15,6 +15,11 @@ public class MainCommand implements CommandExecutor {
         subCommands.put("reload", new ReloadPluginCommand(plugin));
         subCommands.put("setHealth", new SetHealthCommand(plugin));
         subCommands.put("viewHealth", new ViewHealthCommand(plugin));
+        subCommands.put("setStartHealth", new SetStartHealthCommand(plugin));
+        subCommands.put("setGainedPerDeath", new SetGainedPerDeathCommand(plugin));
+        subCommands.put("setGainedMax", new SetGainedMaxCommand(plugin));
+        subCommands.put("setDecrease", new SetDecreaseCommand(plugin));
+        subCommands.put("help", new HelpCommand());
     }
 
     @Override
