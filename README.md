@@ -2,7 +2,7 @@
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21-blue.svg)
 ![Spigot](https://img.shields.io/badge/Spigot-1.21--R0.1--SNAPSHOT-orange.svg)
-![License](https://img.shields.io/badge/License-Apache--2.0-green.svg)
+<!-- ![License](https://img.shields.io/badge/License-Apache--2.0-green.svg) -->
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -13,13 +13,13 @@
 - [Features](#features)
 - [Event Listeners](#event-listeners)
 - [Contributing](#contributing)
-- [License](#license)
+<!-- - [License](#license) -->
 
 ## Introduction
 DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying player health mechanics upon death. The plugin allows server administrators to configure health gained or lost when players die, providing a unique twist to the game.
 
 ## Installation
-1. Download the latest version of the DeathPulse plugin from the [releases page](#).
+1. Download the latest version of the DeathPulse plugin <!-- from the [releases page](#) -->.
 2. Place the downloaded JAR file into your server's `plugins` directory.
 3. Start or restart your Minecraft server.
 4. The plugin will generate a default configuration file in the `plugins/DeathPulse` directory.
@@ -134,10 +134,10 @@ notifications:
 - **PlayerDeathListener**: Handles health modification logic upon player death.
 
 ## Contributing
-Contributions are welcome! Please read the [CONTRIBUTING.md](#) to get started.
-
+Contributions are welcome! <!-- Please read the [CONTRIBUTING.md](#) to get started -->.
+<!--
 ## License
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details. -->
 
 ---
 
