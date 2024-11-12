@@ -14,7 +14,7 @@ public class MainCommand implements CommandExecutor {
     public MainCommand(DeathPulse plugin) {
         subCommands.put("reload", new ReloadPluginCommand(plugin));
         subCommands.put("setHealth", new SetHealthCommand(plugin));
-        subCommands.put("viewHealth", new ViewHealthCommand());
+        subCommands.put("viewHealth", new ViewHealthCommand(plugin));
     }
 
     @Override

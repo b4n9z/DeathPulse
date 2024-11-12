@@ -31,7 +31,7 @@ public class DeathDataManager {
         return isNewDeath;
     }
 
-    private Set<String> loadPlayerDeaths(UUID playerUUID) {
+    public Set<String> loadPlayerDeaths(UUID playerUUID) {
         if (playerDeathCache.containsKey(playerUUID)) {
             return playerDeathCache.get(playerUUID);
         }
