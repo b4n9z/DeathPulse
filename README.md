@@ -4,6 +4,8 @@
 ![Spigot](https://img.shields.io/badge/Spigot-1.21--R0.1--SNAPSHOT-orange.svg)
 <!-- ![License](https://img.shields.io/badge/License-Apache--2.0-green.svg) -->
 
+This `README.md` provides a comprehensive guide to using your DeathPulse plugin, including installation instructions, command usage, permissions, configuration details, and feature explanations. It also invites users to contribute and offers a constructive outlook on potential improvements.
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -144,8 +146,3 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 While DeathPulse provides a unique twist on Minecraft gameplay, there is always room for improvement. Future enhancements could include more granular control over health modifications and additional configurable events. Your feedback and contributions would be invaluable in making this plugin even better!
 
 Enjoy your time with DeathPulse!
-
----
-
-
-This `README.md` provides a comprehensive guide to using your DeathPulse plugin, including installation instructions, command usage, permissions, configuration details, and feature explanations. It also invites users to contribute and offers a constructive outlook on potential improvements.
