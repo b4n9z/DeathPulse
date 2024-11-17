@@ -64,7 +64,7 @@ public class SetDecreaseCommand implements CommandExecutor {
             }
         }
 
-        plugin.getConfigManager().setGainedMaxEnabled(decreaseEnabled);
+        plugin.getConfigManager().setDecreaseEnabled(decreaseEnabled);
         if (decreaseEnabled) {
             plugin.getConfigManager().setDecreasePerDeath(newDecreasePerDeath);
             plugin.getConfigManager().setDecreaseMin(newDecreaseMin);
