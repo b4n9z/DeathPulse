@@ -13,31 +13,37 @@ public class MainCommandCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
+        List<String> commands = new ArrayList<>();
 
         if (args.length == 1) {
             if (sender.hasPermission("dp.reload")) {
-                completions.add("reload");
+                commands.add("reload");
             }
             if (sender.hasPermission("dp.setHealth")) {
-                completions.add("setHealth");
+                commands.add("setHealth");
             }
             if (sender.hasPermission("dp.viewHealth")) {
-                completions.add("viewHealth");
+                commands.add("viewHealth");
             }
             if (sender.hasPermission("dp.setStartHealth")) {
-                completions.add("setStartHealth");
+                commands.add("setStartHealth");
             }
             if (sender.hasPermission("dp.setGainedPerDeath")) {
-                completions.add("setGainedPerDeath");
+                commands.add("setGainedPerDeath");
             }
             if (sender.hasPermission("dp.setGainedMax")) {
-                completions.add("setGainedMax");
+                commands.add("setGainedMax");
             }
             if (sender.hasPermission("dp.setDecrease")) {
-                completions.add("setDecrease");
+                commands.add("setDecrease");
             }
             if (sender.hasPermission("dp.help")) {
-                completions.add("help");
+                commands.add("help");
+            }
+            for (String commandOption : commands) {
+                if (commandOption.toLowerCase().startsWith(args[0].toLowerCase())) {
+                    completions.add(commandOption);
+                }
             }
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("setHealth") || args[0].equalsIgnoreCase("viewHealth")) {
@@ -54,7 +60,7 @@ public class MainCommandCompleter implements TabCompleter {
                 completions.add("false");
             }
         } else if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("setGainedMax")) {
+            if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setHealth")) {
                 // Autocomplete numbers
                 completions.add("<amount>");
             } else if (args[0].equalsIgnoreCase("setDecrease")) {
