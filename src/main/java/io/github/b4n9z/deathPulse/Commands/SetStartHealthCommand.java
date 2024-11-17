@@ -27,14 +27,14 @@ public class SetStartHealthCommand implements CommandExecutor {
 
         if (args.length != 2) {
             sender.sendMessage("Usage: /DeathPulse setStartHealth <amount>");
-            return false;
+            return true;
         }
 
         try {
             int newStartHealth = Integer.parseInt(args[1]);
             if (newStartHealth <= 0) {
                 sender.sendMessage("Start Health amount must be positive.");
-                return false;
+                return true;
             }
             plugin.getConfigManager().setHpStart(newStartHealth);
             plugin.saveConfig();

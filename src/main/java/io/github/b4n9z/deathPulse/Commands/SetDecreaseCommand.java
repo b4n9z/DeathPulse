@@ -27,10 +27,10 @@ public class SetDecreaseCommand implements CommandExecutor {
 
         if (args.length < 2) {
             sender.sendMessage("Usage: /DeathPulse setDecrease <true/false> <perDeathAmount> <minHealthAmount>");
-            return false;
+            return true;
         } else if ((args[1].equalsIgnoreCase("true")) && (args.length != 4)) {
             sender.sendMessage("When Decrease set to true, you must input perDeathAmount and minHealthAmount.");
-            return false;
+            return true;
         }
 
         boolean decreaseEnabled;
@@ -38,29 +38,29 @@ public class SetDecreaseCommand implements CommandExecutor {
             decreaseEnabled = Boolean.parseBoolean(args[1]);
         } catch (Exception e) {
             sender.sendMessage("Invalid value for decrease enabled. Use true or false.");
-            return false;
+            return true;
         }
 
         int newDecreasePerDeath = 0, newDecreaseMin = 0;
         if (decreaseEnabled) {
             if (args.length != 4) {
                 sender.sendMessage("When Decrease set to true, you must input perDeathAmount and minHealthAmount.");
-                return false;
+                return true;
             }
             try {
                 newDecreasePerDeath = Integer.parseInt(args[2]);
                 newDecreaseMin = Integer.parseInt(args[3]);
                 if (newDecreasePerDeath <= 0) {
                     sender.sendMessage("Decrease per death amount must be positive.");
-                    return false;
+                    return true;
                 }
                 if (newDecreaseMin <= 0) {
                     sender.sendMessage("Decrease Health minimum must be positive.");
-                    return false;
+                    return true;
                 }
             } catch (NumberFormatException e) {
                 sender.sendMessage("Invalid Format Number for perDeathAmount or minHealthAmount.");
-                return false;
+                return true;
             }
         }
 

@@ -39,15 +39,32 @@ public class MainCommandCompleter implements TabCompleter {
             if (sender.hasPermission("dp.help")) {
                 completions.add("help");
             }
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("setHealth")) {
-            // Autocomplete player names
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                completions.add(player.getName());
+        } else if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("setHealth") || args[0].equalsIgnoreCase("viewHealth")) {
+                // Autocomplete player names
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    completions.add(player.getName());
+                }
+            } else if (args[0].equalsIgnoreCase("setStartHealth") || args[0].equalsIgnoreCase("setGainedPerDeath")) {
+                // Autocomplete numbers
+                completions.add("<amount>");
+            } else if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setDecrease")) {
+                // Autocomplete numbers
+                completions.add("true");
+                completions.add("false");
             }
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("viewHealth")) {
-            // Autocomplete player names
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                completions.add(player.getName());
+        } else if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("setGainedMax")) {
+                // Autocomplete numbers
+                completions.add("<amount>");
+            } else if (args[0].equalsIgnoreCase("setDecrease")) {
+                // Autocomplete numbers
+                completions.add("<perDeathAmount>");
+            }
+        } else if (args.length == 4) {
+            if (args[0].equalsIgnoreCase("setDecrease")) {
+                // Autocomplete numbers
+                completions.add("<minHealthAmount>");
             }
         }
         return completions;

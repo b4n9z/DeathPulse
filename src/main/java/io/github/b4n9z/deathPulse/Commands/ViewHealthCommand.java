@@ -34,13 +34,13 @@ public class ViewHealthCommand implements CommandExecutor {
 
         if (args.length != 2) {
             sender.sendMessage("Usage: /DeathPulse viewHealth <player>");
-            return false;
+            return true;
         }
 
-        Player targetPlayer = Bukkit.getPlayer(args[0]);
+        Player targetPlayer = Bukkit.getPlayer(args[1]);
         if (targetPlayer == null) {
-            sender.sendMessage("Player not found or not online.");
-            return false;
+            sender.sendMessage("Player " + args[1] +" not found or not online.");
+            return true;
         }
 
         double currentHealth = HealthManager.getHealth(targetPlayer);

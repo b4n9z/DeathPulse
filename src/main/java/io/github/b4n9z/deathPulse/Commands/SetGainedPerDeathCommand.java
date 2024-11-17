@@ -27,14 +27,14 @@ public class SetGainedPerDeathCommand implements CommandExecutor {
 
         if (args.length != 2) {
             sender.sendMessage("Usage: /DeathPulse setGainedPerDeath <amount>");
-            return false;
+            return true;
         }
 
         try {
             int newGainedPerDeath = Integer.parseInt(args[1]);
             if (newGainedPerDeath <= 0) {
                 sender.sendMessage("Gained per death amount must be positive.");
-                return false;
+                return true;
             }
             plugin.getConfigManager().setGainedPerDeath(newGainedPerDeath);
             plugin.saveConfig();

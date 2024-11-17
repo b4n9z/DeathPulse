@@ -5,21 +5,25 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MainCommand implements CommandExecutor {
-    private final Map<String, CommandExecutor> subCommands = new HashMap<>();
+    private final ReloadPluginCommand reloadPluginCommand;
+    private final SetHealthCommand setHealthCommand;
+    private final ViewHealthCommand viewHealthCommand;
+    private final SetStartHealthCommand setStartHealthCommand;
+    private final SetGainedPerDeathCommand setGainedPerDeathCommand;
+    private final SetGainedMaxCommand setGainedMaxCommand;
+    private final SetDecreaseCommand setDecreaseCommand;
+    private final HelpCommand helpCommand;
 
     public MainCommand(DeathPulse plugin) {
-        subCommands.put("reload", new ReloadPluginCommand(plugin));
-        subCommands.put("setHealth", new SetHealthCommand(plugin));
-        subCommands.put("viewHealth", new ViewHealthCommand(plugin));
-        subCommands.put("setStartHealth", new SetStartHealthCommand(plugin));
-        subCommands.put("setGainedPerDeath", new SetGainedPerDeathCommand(plugin));
-        subCommands.put("setGainedMax", new SetGainedMaxCommand(plugin));
-        subCommands.put("setDecrease", new SetDecreaseCommand(plugin));
-        subCommands.put("help", new HelpCommand());
+        this.reloadPluginCommand = new ReloadPluginCommand(plugin);
+        this.setHealthCommand = new SetHealthCommand(plugin);
+        this.viewHealthCommand = new ViewHealthCommand(plugin);
+        this.setStartHealthCommand = new SetStartHealthCommand(plugin);
+        this.setGainedPerDeathCommand = new SetGainedPerDeathCommand(plugin);
+        this.setGainedMaxCommand = new SetGainedMaxCommand(plugin);
+        this.setDecreaseCommand = new SetDecreaseCommand(plugin);
+        this.helpCommand = new HelpCommand();
     }
 
     @Override
@@ -29,12 +33,20 @@ public class MainCommand implements CommandExecutor {
             return false;
         }
 
-        CommandExecutor executor = subCommands.get(args[0].toLowerCase());
-        if (executor == null) {
-            sender.sendMessage("Unknown subcommand.");
-            return false;
-        }
-
-        return executor.onCommand(sender, command, label, args);
+        String subCommand = args[0];
+        return switch (subCommand) {
+            case "reload" -> reloadPluginCommand.onCommand(sender, command, label, args);
+            case "setHealth" -> setHealthCommand.onCommand(sender, command, label, args);
+            case "viewHealth" -> viewHealthCommand.onCommand(sender, command, label, args);
+            case "setStartHealth" -> setStartHealthCommand.onCommand(sender, command, label, args);
+            case "setGainedPerDeath" -> setGainedPerDeathCommand.onCommand(sender, command, label, args);
+            case "setGainedMax" -> setGainedMaxCommand.onCommand(sender, command, label, args);
+            case "setDecrease" -> setDecreaseCommand.onCommand(sender, command, label, args);
+            case "help" -> helpCommand.onCommand(sender, command, label, args);
+            default -> {
+                sender.sendMessage("Unknown subcommand.");
+                yield true;
+            }
+        };
     }
 }

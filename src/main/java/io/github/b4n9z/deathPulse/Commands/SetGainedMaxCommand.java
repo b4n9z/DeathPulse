@@ -27,10 +27,10 @@ public class SetGainedMaxCommand implements CommandExecutor {
 
         if (args.length < 2) {
             sender.sendMessage("Usage: /DeathPulse setGainedMax <true/false> <maxHealthAmount>");
-            return false;
+            return true;
         } else if ((args[1].equalsIgnoreCase("true")) && (args.length != 3)) {
             sender.sendMessage("When gained max set to true, you must input amount.");
-            return false;
+            return true;
         }
 
         boolean gainedMaxEnabled;
@@ -38,24 +38,24 @@ public class SetGainedMaxCommand implements CommandExecutor {
             gainedMaxEnabled = Boolean.parseBoolean(args[1]);
         } catch (Exception e) {
             sender.sendMessage("Invalid value for gained max enabled. Use true or false.");
-            return false;
+            return true;
         }
 
         int newGainedMaxAmount = 0;
         if (gainedMaxEnabled) {
             if (args.length != 3) {
                 sender.sendMessage("When gained max is set to true, you must input amount.");
-                return false;
+                return true;
             }
             try {
                 newGainedMaxAmount = Integer.parseInt(args[2]);
                 if (newGainedMaxAmount <= 0) {
                     sender.sendMessage("Gained per death amount must be positive.");
-                    return false;
+                    return true;
                 }
             } catch (NumberFormatException e) {
                 sender.sendMessage("Invalid health amount.");
-                return false;
+                return true;
             }
         }
 

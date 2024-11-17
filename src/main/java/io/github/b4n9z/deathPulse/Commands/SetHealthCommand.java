@@ -30,13 +30,13 @@ public class SetHealthCommand implements CommandExecutor {
 
         if (args.length != 3) {
             sender.sendMessage("Usage: /DeathPulse setHealth <player> <amount>");
-            return false;
+            return true;
         }
 
         Player targetPlayer = Bukkit.getPlayer(args[1]);
         if (targetPlayer == null) {
             sender.sendMessage("Player not found.");
-            return false;
+            return true;
         }
 
         double newHealth;
@@ -44,7 +44,7 @@ public class SetHealthCommand implements CommandExecutor {
             newHealth = Double.parseDouble(args[2]);
         } catch (NumberFormatException e) {
             sender.sendMessage("Invalid health amount.");
-            return false;
+            return true;
         }
 
         if (newHealth > plugin.getConfigManager().getGainedMaxAmount()) {
