@@ -1,10 +1,12 @@
 # DeathPulse Plugin
 
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21-blue.svg)
-![Spigot](https://img.shields.io/badge/Spigot-1.21--R0.1--SNAPSHOT-orange.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21-green.svg)
+![Bukkit](https://img.shields.io/badge/Bukkit-1.21_Spigot--API-red.svg)
+![Spigot](https://img.shields.io/badge/Spigot-1.21_Spigot--API-orange.svg)
+![Paper](https://img.shields.io/badge/Paper-1.21_Spigot--API-blue.svg)
 <!-- ![License](https://img.shields.io/badge/License-Apache--2.0-green.svg) -->
 
-This `README.md` provides a comprehensive guide to using your DeathPulse plugin, including installation instructions, command usage, permissions, configuration details, and feature explanations. It also invites users to contribute and offers a constructive outlook on potential improvements.
+This `README.md` provides a comprehensive guide to using the DeathPulse plugin, including installation instructions, command usage, permissions, configuration details, and feature explanations. It also invites users to contribute and offers a constructive outlook on potential improvements.
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -136,7 +138,7 @@ notifications:
 - **PlayerDeathListener**: Handles health modification logic upon player death.
 
 ## Contributing
-Contributions are welcome! <!-- Please read the [CONTRIBUTING.md](#) to get started -->.
+Contributions are welcome! <!-- Please read the [CONTRIBUTING.md](#) to get started. -->
 <!--
 ## License
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details. -->
