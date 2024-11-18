@@ -15,6 +15,9 @@ public class DeathPulse extends JavaPlugin implements CommandExecutor {
         saveDefaultConfig();
         loadConfigManager();
         registerEventsAndCommands();
+        int pluginId = 23923;
+        Metrics metrics = new Metrics(this, pluginId);
+        metrics.addCustomChart(new Metrics.SimplePie("chart_id", () -> "My value"));
         getLogger().info("DeathPulse plugin enabled!");
     }
 
