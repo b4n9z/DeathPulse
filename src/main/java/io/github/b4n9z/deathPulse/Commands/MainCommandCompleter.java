@@ -1,6 +1,7 @@
 package io.github.b4n9z.deathPulse.Commands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -25,6 +26,12 @@ public class MainCommandCompleter implements TabCompleter {
             if (sender.hasPermission("dp.viewHealth")) {
                 commands.add("viewHealth");
             }
+            if (sender.hasPermission("dp.resetHealth")) {
+                commands.add("resetHealth");
+            }
+            if (sender.hasPermission("dp.matchHealth")) {
+                commands.add("matchHealth");
+            }
             if (sender.hasPermission("dp.setStartHealth")) {
                 commands.add("setStartHealth");
             }
@@ -46,8 +53,14 @@ public class MainCommandCompleter implements TabCompleter {
                 }
             }
         } else if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("setHealth") || args[0].equalsIgnoreCase("viewHealth")) {
+            if (args[0].equalsIgnoreCase("setHealth") || args[0].equalsIgnoreCase("viewHealth") || args[0].equalsIgnoreCase("resetHealth") || args[0].equalsIgnoreCase("matchHealth") || args[0].equalsIgnoreCase("removeDeathData")) {
                 // Autocomplete player names
+                if (args[0].equalsIgnoreCase("resetHealth") || args[0].equalsIgnoreCase("matchHealth") || args[0].equalsIgnoreCase("removeDeathData")) {
+                    completions.add("allPlayer");
+                    for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+                        completions.add(offlinePlayer.getName());
+                    }
+                }
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     completions.add(player.getName());
                 }
