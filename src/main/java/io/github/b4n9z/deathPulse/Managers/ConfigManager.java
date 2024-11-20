@@ -12,7 +12,8 @@ public class ConfigManager {
     private int gainedMaxAmount;
     private boolean decreaseEnabled;
     private int decreasePerDeath;
-    private int decreaseMin;
+    private boolean decreaseMinEnabled;
+    private int decreaseMinAmount;
     private boolean deathMustDifference;
     private List<String> deathIgnored;
     private List<String> decreaseCause;
@@ -36,7 +37,8 @@ public class ConfigManager {
         this.gainedMaxAmount = plugin.getConfig().getInt("HP.gained.max.amount", 114);
         this.decreaseEnabled = plugin.getConfig().getBoolean("HP.decrease.enabled", false);
         this.decreasePerDeath = plugin.getConfig().getInt("HP.decrease.per_death", 2);
-        this.decreaseMin = plugin.getConfig().getInt("HP.decrease.min", 2);
+        this.decreaseMinEnabled = plugin.getConfig().getBoolean("HP.decrease.min.enabled", false);
+        this.decreaseMinAmount = plugin.getConfig().getInt("HP.decrease.min.amount", 2);
         this.deathMustDifference = plugin.getConfig().getBoolean("death.must_difference", true);
         this.deathIgnored = plugin.getConfig().getStringList("death.ignored");
         this.decreaseCause = plugin.getConfig().getStringList("death.decrease");
@@ -104,13 +106,22 @@ public class ConfigManager {
         this.decreasePerDeath = decreasePerDeath;
     }
 
-    public int getDecreaseMin() {
-        return decreaseMin;
+    public boolean isDecreaseMinEnabled() {
+        return decreaseMinEnabled;
     }
 
-    public void setDecreaseMin(int decreaseMin) {
-        plugin.getConfig().set("HP.decrease.min", decreaseMin);
-        this.decreaseMin = decreaseMin;
+    public void setDecreaseMinEnabled(boolean decreaseMinEnabled) {
+        plugin.getConfig().set("HP.decrease.min.enabled", decreaseMinEnabled);
+        this.decreaseMinEnabled = decreaseMinEnabled;
+    }
+
+    public int getDecreaseMinAmount() {
+        return decreaseMinAmount;
+    }
+
+    public void setDecreaseMinAmount(int decreaseMinAmount) {
+        plugin.getConfig().set("HP.decrease.min.amount", decreaseMinAmount);
+        this.decreaseMinAmount = decreaseMinAmount;
     }
 
     // Death settings

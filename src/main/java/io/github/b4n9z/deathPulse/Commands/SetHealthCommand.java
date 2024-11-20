@@ -50,8 +50,8 @@ public class SetHealthCommand implements CommandExecutor {
         if (newHealth > plugin.getConfigManager().getGainedMaxAmount()) {
             sender.sendMessage("Health amount exceeds the max limit (" + plugin.getConfigManager().getGainedMaxAmount() + ").");
             return true;
-        } else if (newHealth < plugin.getConfigManager().getDecreaseMin()) {
-            sender.sendMessage("Health amount under the min limit (" +  plugin.getConfigManager().getDecreaseMin() + ").");
+        } else if (newHealth < plugin.getConfigManager().getDecreaseMinAmount()) {
+            sender.sendMessage("Health amount under the min limit (" +  plugin.getConfigManager().getDecreaseMinAmount() + ").");
             return true;
         }
 

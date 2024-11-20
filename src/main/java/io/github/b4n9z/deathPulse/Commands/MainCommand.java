@@ -20,6 +20,7 @@ public class MainCommand implements CommandExecutor {
     private final SetGainedPerDeathCommand setGainedPerDeathCommand;
     private final SetGainedMaxCommand setGainedMaxCommand;
     private final SetDecreaseCommand setDecreaseCommand;
+    private final SetDecreaseMinCommand setDecreaseMinCommand;
     private final HelpCommand helpCommand;
 
     public MainCommand(DeathPulse plugin) {
@@ -34,6 +35,7 @@ public class MainCommand implements CommandExecutor {
         this.setGainedPerDeathCommand = new SetGainedPerDeathCommand(plugin);
         this.setGainedMaxCommand = new SetGainedMaxCommand(plugin);
         this.setDecreaseCommand = new SetDecreaseCommand(plugin);
+        this.setDecreaseMinCommand = new SetDecreaseMinCommand(plugin);
         this.helpCommand = new HelpCommand();
     }
 
@@ -83,6 +85,7 @@ public class MainCommand implements CommandExecutor {
             case "setGainedPerDeath" -> setGainedPerDeathCommand.onCommand(sender, command, label, args);
             case "setGainedMax" -> setGainedMaxCommand.onCommand(sender, command, label, args);
             case "setDecrease" -> setDecreaseCommand.onCommand(sender, command, label, args);
+            case "setDecreaseMin" -> setDecreaseMinCommand.onCommand(sender, command, label, args);
             case "help" -> helpCommand.onCommand(sender, command, label, args);
             default -> {
                 sender.sendMessage("Unknown subcommand.");

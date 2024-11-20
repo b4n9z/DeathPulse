@@ -33,8 +33,8 @@ public class PlayerDeathListener implements Listener {
 
         if (plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().getDecreaseCause().contains(deathCause)) {
             double newMaxHealth = HealthManager.getMaxHealth(player) - plugin.getConfigManager().getDecreasePerDeath();
-            if(newMaxHealth < plugin.getConfigManager().getDecreaseMin()){
-                newMaxHealth = plugin.getConfigManager().getDecreaseMin();
+            if(newMaxHealth < plugin.getConfigManager().getDecreaseMinAmount()){
+                newMaxHealth = plugin.getConfigManager().getDecreaseMinAmount();
             }
             HealthManager.setMaxHealth(newMaxHealth, player);
             String msgPlayer = plugin.getConfigManager().getDeathMessagePlayerDecrease()

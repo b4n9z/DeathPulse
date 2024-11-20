@@ -50,7 +50,7 @@ public class SetGainedMaxCommand implements CommandExecutor {
             try {
                 newGainedMaxAmount = Integer.parseInt(args[2]);
                 if (newGainedMaxAmount <= 0) {
-                    sender.sendMessage("Gained per death amount must be positive.");
+                    sender.sendMessage("Gained max amount must be positive.");
                     return true;
                 }
             } catch (NumberFormatException e) {

@@ -14,7 +14,7 @@ public class HelpCommand implements CommandExecutor {
         sender.sendMessage("/§cDeathPulse§e setStartHealth <amount>§f - Sets the starting health for players.");
         sender.sendMessage("/§cDeathPulse§e setGainedPerDeath <amount>§f - Sets the health gained per death.");
         sender.sendMessage("/§cDeathPulse§e setGainedMax <true/false> <amount>§f - Sets the maximum health gain per death.");
-        sender.sendMessage("/§cDeathPulse§e setDecrease <true/false> <perDeathAmount> <minHealthAmount>§f - Activates health decrease.");
+        sender.sendMessage("/§cDeathPulse§e setDecrease <true/false> <perDeathAmount>§f - Activates health decrease.");
         sender.sendMessage("/§cDeathPulse§e help§f - Shows this help message.");
         return true;
     }

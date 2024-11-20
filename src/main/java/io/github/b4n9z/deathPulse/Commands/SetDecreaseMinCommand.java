@@ -7,16 +7,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
-public class SetDecreaseCommand implements CommandExecutor {
+public class SetDecreaseMinCommand implements CommandExecutor {
     private final DeathPulse plugin;
 
-    public SetDecreaseCommand(DeathPulse plugin) {
+    public SetDecreaseMinCommand(DeathPulse plugin) {
         this.plugin = plugin;
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.setDecrease"))){
+            if (!(player.isOp()) || !(player.hasPermission("dp.setDecreaseMin"))){
                 sender.sendMessage("You do not have permission to use this command.");
                 return false;
             }
@@ -26,46 +26,46 @@ public class SetDecreaseCommand implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            sender.sendMessage("Usage: /DeathPulse setDecrease <true/false> <perDeathAmount>");
+            sender.sendMessage("Usage: /DeathPulse setDecreaseMin <true/false> <minHealthAmount>");
             return true;
         } else if ((args[1].equalsIgnoreCase("true")) && (args.length != 3)) {
-            sender.sendMessage("When Decrease set to true, you must input perDeathAmount.");
+            sender.sendMessage("When gained min is set to true, you must input amount.");
             return true;
         }
 
-        boolean decreaseEnabled;
+        boolean decreasedMinEnabled;
         try {
-            decreaseEnabled = Boolean.parseBoolean(args[1]);
+            decreasedMinEnabled = Boolean.parseBoolean(args[1]);
         } catch (Exception e) {
-            sender.sendMessage("Invalid value for decrease enabled. Use true or false.");
+            sender.sendMessage("Invalid value for decreased min enabled. Use true or false.");
             return true;
         }
 
-        int newDecreasePerDeath = 0;
-        if (decreaseEnabled) {
+        int newDecreasedMinAmount = 0;
+        if (decreasedMinEnabled) {
             if (args.length != 3) {
-                sender.sendMessage("When Decrease set to true, you must input perDeathAmount.");
+                sender.sendMessage("When decreased min is set to true, you must input amount.");
                 return true;
             }
             try {
-                newDecreasePerDeath = Integer.parseInt(args[2]);
-                if (newDecreasePerDeath <= 0) {
-                    sender.sendMessage("Decrease per death amount must be positive.");
+                newDecreasedMinAmount = Integer.parseInt(args[2]);
+                if (newDecreasedMinAmount < 0) {
+                    sender.sendMessage("Decreased min amount must be positive.");
                     return true;
                 }
             } catch (NumberFormatException e) {
-                sender.sendMessage("Invalid Format Number for perDeathAmount.");
+                sender.sendMessage("Invalid health amount.");
                 return true;
             }
         }
 
-        plugin.getConfigManager().setDecreaseEnabled(decreaseEnabled);
-        if (decreaseEnabled) {
-            plugin.getConfigManager().setDecreasePerDeath(newDecreasePerDeath);
+        plugin.getConfigManager().setDecreaseMinEnabled(decreasedMinEnabled);
+        if (decreasedMinEnabled) {
+            plugin.getConfigManager().setDecreaseMinAmount(newDecreasedMinAmount);
         }
         plugin.saveConfig();
         plugin.reloadConfig();
-        sender.sendMessage("Decrease set to " + args[1] + (decreaseEnabled ? " with Health per death " + args[2] : ""));
+        sender.sendMessage("Decrease min set to " + args[1] + (decreasedMinEnabled ? " with amount " + args[2] : ""));
         sender.sendMessage("Reload the plugin or restart the server for changes to take effect.");
 
         return true;

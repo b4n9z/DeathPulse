@@ -32,6 +32,9 @@ public class MainCommandCompleter implements TabCompleter {
             if (sender.hasPermission("dp.matchHealth")) {
                 commands.add("matchHealth");
             }
+            if (sender.hasPermission("dp.removeDeathData")) {
+                commands.add("removeDeathData");
+            }
             if (sender.hasPermission("dp.setStartHealth")) {
                 commands.add("setStartHealth");
             }
@@ -43,6 +46,9 @@ public class MainCommandCompleter implements TabCompleter {
             }
             if (sender.hasPermission("dp.setDecrease")) {
                 commands.add("setDecrease");
+            }
+            if (sender.hasPermission("dp.setDecreaseMin")) {
+                commands.add("setDecreaseMin");
             }
             if (sender.hasPermission("dp.help")) {
                 commands.add("help");
@@ -67,23 +73,18 @@ public class MainCommandCompleter implements TabCompleter {
             } else if (args[0].equalsIgnoreCase("setStartHealth") || args[0].equalsIgnoreCase("setGainedPerDeath")) {
                 // Autocomplete numbers
                 completions.add("<amount>");
-            } else if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setDecrease")) {
+            } else if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setDecrease") || args[0].equalsIgnoreCase("setDecreaseMin")) {
                 // Autocomplete numbers
                 completions.add("true");
                 completions.add("false");
             }
         } else if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setHealth")) {
+            if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setHealth") || args[0].equalsIgnoreCase("setDecreaseMin")) {
                 // Autocomplete numbers
                 completions.add("<amount>");
             } else if (args[0].equalsIgnoreCase("setDecrease")) {
                 // Autocomplete numbers
                 completions.add("<perDeathAmount>");
-            }
-        } else if (args.length == 4) {
-            if (args[0].equalsIgnoreCase("setDecrease")) {
-                // Autocomplete numbers
-                completions.add("<minHealthAmount>");
             }
         }
         return completions;
