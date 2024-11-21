@@ -91,6 +91,7 @@ DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying playe
 The configuration file (`config.yml`) allows you to customize various aspects of the plugin:
 
 ```yaml
+# config.yml
 HP:
   start: 20 #Sart HP player
   gained:
@@ -101,18 +102,19 @@ HP:
   decrease: #decrease HP player when death with certain type
     enabled: false #true or false, when true, player can decrease their HP
     per_death: 2 #HP decrease per player death
-    min: 2 #HP minimum player when always death with decrease type
+    min: #HP minimum player when always death with decrease type
+      enabled: false #true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
+      amount: 2 #Min HP player limit
+      banTime: 24 #Ban time in hours
 
 death:
   must_difference: true #true or false, when true, player must die with different way to gained HP
   ignored: #Ignored death type cause player not gain HP
   #  - lava
   #  - fall
-  #  - player_attack
   decrease: #decrease HP player when death with certain type
   #  - lava
   #  - fall
-  #  - player_attack
 
 notifications:
   death_message:
