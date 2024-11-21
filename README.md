@@ -52,9 +52,24 @@ DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying playe
     - **Description**: Views the health of a specified player.
     - **Permission**: `dp.viewHealth`
 
+- **resetHealth**:
+    - **Usage**: `/dp resetHealth <player|allPlayer>`
+    - **Description**: Resets the health of a specified player or all players to the starting health.
+    - **Permission**: `dp.resetHealth`
+
+- **matchHealth**:
+    - **Usage**: `/dp matchHealth <player|allPlayer>`
+    - **Description**: Matches the health of a specified player or all players based on their death data.
+    - **Permission**: `dp.matchHealth`
+
+- **removeDeathData**:
+    - **Usage**: `/dp removeDeathData <player|allPlayer>`
+    - **Description**: Removes the death data of a specified player or all players.
+    - **Permission**: `dp.removeDeathData`
+
 - **setStartHealth**:
     - **Usage**: `/dp setStartHealth <amount>`
-    - **Description**: Sets the starting health for players.
+    - **Description**: Sets the starting health for players in config.
     - **Permission**: `dp.setStartHealth`
 
 - **setGainedPerDeath**:
@@ -72,6 +87,11 @@ DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying playe
     - **Description**: Sets the health decrease per death.
     - **Permission**: `dp.setDecrease`
 
+- **setDecreaseMin**:
+    - **Usage**: `/dp setDecreaseMin <true/false> <minHealthAmount/banTime>`
+    - **Description**: Sets the minimum health decrease or ban time. When set to true, it configures minimum health amount; when set to false, it configures ban time in hours.
+    - **Permission**: `dp.setDecreaseMin`
+
 - **help**:
     - **Usage**: `/dp help`
     - **Description**: Shows this help message.
@@ -82,10 +102,15 @@ DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying playe
 - `dp.reload`: Permission to reload the plugin configuration.
 - `dp.setHealth`: Permission to set player health.
 - `dp.viewHealth`: Permission to view player health.
+- `dp.resetHealth`: Permission to reset player health.
+- `dp.matchHealth`: Permission to match player health.
+- `dp.removeDeathData`: Permission to remove player death data.
 - `dp.setStartHealth`: Permission to set starting health.
 - `dp.setGainedPerDeath`: Permission to set health gained per death.
 - `dp.setGainedMax`: Permission to set maximum gained health.
 - `dp.setDecrease`: Permission to set health decrease.
+- `dp.setDecreaseMin`: Permission to set minimum health decrease or ban time.
+- `dp.help`: Permission to view the help message.
 
 ## Configuration
 The configuration file (`config.yml`) allows you to customize various aspects of the plugin:
@@ -134,6 +159,11 @@ notifications:
 - **Customizable Messages**: Tailor the messages players receive upon death.
 - **Ignored Death Causes**: Specify certain death causes to ignore.
 - **First Join Health**: Set the health players start with on their first join.
+- **Maximum Health Limit**: Set a maximum health limit that players can reach.
+- **Minimum Health Limit/Ban**: Set a minimum health limit, or ban players when their health drops to zero.
+- **Health Matching**: Match the health of a specified player or all players based on their death data.
+- **Death Data Management**: Remove death data of a specified player or all players.
+- **Configuration Reload**: Reload the plugin configuration without restarting the server.
 
 ## Event Listeners
 - **PlayerJoinListener**: Sets the player's max health when they join the server for the first time.
