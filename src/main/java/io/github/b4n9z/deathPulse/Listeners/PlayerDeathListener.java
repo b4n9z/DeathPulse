@@ -2,11 +2,16 @@ package io.github.b4n9z.deathPulse.Listeners;
 
 import io.github.b4n9z.deathPulse.DeathPulse;
 import io.github.b4n9z.deathPulse.Managers.HealthManager;
+import org.bukkit.BanEntry;
+import org.bukkit.BanList;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.profile.PlayerProfile;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class PlayerDeathListener implements Listener {
@@ -19,6 +24,7 @@ public class PlayerDeathListener implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity().getPlayer();
+        BanEntry entry = null;
         if (player == null) return;
         UUID playerUUID = player.getUniqueId();
         String deathCause = event.getDamageSource().getDamageType().getTranslationKey();
@@ -33,8 +39,22 @@ public class PlayerDeathListener implements Listener {
 
         if (plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().getDecreaseCause().contains(deathCause)) {
             double newMaxHealth = HealthManager.getMaxHealth(player) - plugin.getConfigManager().getDecreasePerDeath();
-            if(newMaxHealth < plugin.getConfigManager().getDecreaseMinAmount()){
+            plugin.getDeathDataManager().logDeath(playerUUID, deathCause);
+            if(plugin.getConfigManager().isDecreaseMinEnabled() && newMaxHealth < plugin.getConfigManager().getDecreaseMinAmount()){
                 newMaxHealth = plugin.getConfigManager().getDecreaseMinAmount();
+            } else if(!plugin.getConfigManager().isDecreaseMinEnabled() && newMaxHealth <= 0){
+                newMaxHealth = 0;
+                long durationInMillis = (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000;
+                Date banTime = new Date(System.currentTimeMillis() + durationInMillis);
+                BanList<PlayerProfile> banList = Bukkit.getServer().getBanList(BanList.Type.PROFILE);
+                PlayerProfile playerProfile = player.getPlayerProfile();
+                BanEntry<PlayerProfile> banEntry = banList.getBanEntry(playerProfile);
+                if (banEntry == null) {
+                    banList.addBan(playerProfile, "You have been banned due to low health", banTime, null);
+                } else {
+                    banEntry.setExpiration(banTime);
+                }
+                player.kickPlayer("You have been banned due to low health");
             }
             HealthManager.setMaxHealth(newMaxHealth, player);
             String msgPlayer = plugin.getConfigManager().getDeathMessagePlayerDecrease()

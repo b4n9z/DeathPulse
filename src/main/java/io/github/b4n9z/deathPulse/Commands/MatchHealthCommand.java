@@ -94,6 +94,7 @@ public class MatchHealthCommand implements CommandExecutor {
     private int calculateHealthFromDeathData(Set<String> deathData) {
         int startHealth = plugin.getConfigManager().getHpStart();
         int gainedPerDeath = plugin.getConfigManager().getGainedPerDeath();
+        int decreasePerDeath = plugin.getConfigManager().getDecreasePerDeath();
         Set<String> ignoredDeaths = new HashSet<>(plugin.getConfigManager().getDeathIgnored());
         Set<String> decreaseCauses = new HashSet<>(plugin.getConfigManager().getDecreaseCause());
 
@@ -101,6 +102,20 @@ public class MatchHealthCommand implements CommandExecutor {
                 .filter(deathCause -> !ignoredDeaths.contains(deathCause) && !decreaseCauses.contains(deathCause))
                 .count();
 
-        return startHealth + (int) (validDeathsCount * gainedPerDeath);
+        long decreaseDeathsCount = deathData.stream()
+                .filter(decreaseCauses::contains)
+                .count();
+
+        int totalHealth = startHealth + (int) (validDeathsCount * gainedPerDeath) - (int) (decreaseDeathsCount * decreasePerDeath);
+
+        if (plugin.getConfigManager().isGainedMaxEnabled()){
+            totalHealth = Math.min(totalHealth, plugin.getConfigManager().getGainedMaxAmount());
+        }
+
+        if (plugin.getConfigManager().isDecreaseMinEnabled()){
+            totalHealth = Math.max(totalHealth, plugin.getConfigManager().getDecreaseMinAmount());
+        }
+
+        return totalHealth;
     }
 }

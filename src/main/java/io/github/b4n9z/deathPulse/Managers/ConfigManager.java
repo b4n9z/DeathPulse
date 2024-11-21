@@ -14,6 +14,7 @@ public class ConfigManager {
     private int decreasePerDeath;
     private boolean decreaseMinEnabled;
     private int decreaseMinAmount;
+    private int decreaseBanTime;
     private boolean deathMustDifference;
     private List<String> deathIgnored;
     private List<String> decreaseCause;
@@ -39,6 +40,7 @@ public class ConfigManager {
         this.decreasePerDeath = plugin.getConfig().getInt("HP.decrease.per_death", 2);
         this.decreaseMinEnabled = plugin.getConfig().getBoolean("HP.decrease.min.enabled", false);
         this.decreaseMinAmount = plugin.getConfig().getInt("HP.decrease.min.amount", 2);
+        this.decreaseBanTime = plugin.getConfig().getInt("HP.decrease.min.banTime", 24);
         this.deathMustDifference = plugin.getConfig().getBoolean("death.must_difference", true);
         this.deathIgnored = plugin.getConfig().getStringList("death.ignored");
         this.decreaseCause = plugin.getConfig().getStringList("death.decrease");
@@ -122,6 +124,15 @@ public class ConfigManager {
     public void setDecreaseMinAmount(int decreaseMinAmount) {
         plugin.getConfig().set("HP.decrease.min.amount", decreaseMinAmount);
         this.decreaseMinAmount = decreaseMinAmount;
+    }
+
+    public int getDecreaseBanTime() {
+        return decreaseBanTime;
+    }
+
+    public void setDecreaseBanTime(int decreaseBanTime) {
+        plugin.getConfig().set("HP.decrease.min.banTime", decreaseBanTime);
+        this.decreaseBanTime = decreaseBanTime;
     }
 
     // Death settings

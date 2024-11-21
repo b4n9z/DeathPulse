@@ -26,10 +26,13 @@ public class SetDecreaseMinCommand implements CommandExecutor {
         }
 
         if (args.length < 2) {
-            sender.sendMessage("Usage: /DeathPulse setDecreaseMin <true/false> <minHealthAmount>");
+            sender.sendMessage("Usage: /DeathPulse setDecreaseMin <true/false> <minHealthAmount/banTime>");
             return true;
         } else if ((args[1].equalsIgnoreCase("true")) && (args.length != 3)) {
             sender.sendMessage("When gained min is set to true, you must input amount.");
+            return true;
+        } else if ((args[1].equalsIgnoreCase("false")) && (args.length != 3)) {
+            sender.sendMessage("When decreased min is set to false, you must input ban time in hours.");
             return true;
         }
 
@@ -42,6 +45,8 @@ public class SetDecreaseMinCommand implements CommandExecutor {
         }
 
         int newDecreasedMinAmount = 0;
+        int newBanTime = 0;
+
         if (decreasedMinEnabled) {
             if (args.length != 3) {
                 sender.sendMessage("When decreased min is set to true, you must input amount.");
@@ -57,16 +62,33 @@ public class SetDecreaseMinCommand implements CommandExecutor {
                 sender.sendMessage("Invalid health amount.");
                 return true;
             }
+        } else {
+            if (args.length != 3) {
+                sender.sendMessage("When decreased min is set to false, you must input ban time in hours.");
+                return true;
+            }
+            try {
+                newBanTime = Integer.parseInt(args[2]);
+                if (newBanTime < 0) {
+                    sender.sendMessage("Ban time must be positive.");
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                sender.sendMessage("Invalid ban time.");
+                return true;
+            }
         }
 
         plugin.getConfigManager().setDecreaseMinEnabled(decreasedMinEnabled);
         if (decreasedMinEnabled) {
             plugin.getConfigManager().setDecreaseMinAmount(newDecreasedMinAmount);
+        } else {
+            plugin.getConfigManager().setDecreaseBanTime(newBanTime);
         }
         plugin.saveConfig();
         plugin.reloadConfig();
-        sender.sendMessage("Decrease min set to " + args[1] + (decreasedMinEnabled ? " with amount " + args[2] : ""));
-        sender.sendMessage("Reload the plugin or restart the server for changes to take effect.");
+        sender.sendMessage("Decrease min set to " + args[1] + (decreasedMinEnabled ? " with amount " + args[2] : " with ban time " + args[2]) + " hours");
+        sender.sendMessage("Reload the plugin or restart the server for changes to take effect");
 
         return true;
     }

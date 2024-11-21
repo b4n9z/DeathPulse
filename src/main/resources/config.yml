@@ -10,8 +10,9 @@ HP:
     enabled: false #true or false, when true, player can decrease their HP
     per_death: 2 #HP decrease per player death
     min: #HP minimum player when always death with decrease type
-      enabled: false #true or false, when true, player has min HP limit
+      enabled: false #true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
       amount: 2 #Min HP player limit
+      banTime: 24 #Ban time in hours
 
 death:
   must_difference: true #true or false, when true, player must die with different way to gained HP
