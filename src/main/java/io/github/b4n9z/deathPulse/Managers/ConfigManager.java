@@ -15,6 +15,10 @@ public class ConfigManager {
     private boolean decreaseMinEnabled;
     private int decreaseMinAmount;
     private int decreaseBanTime;
+    private boolean decreaseDayEnabled;
+    private String decreaseDayType;
+    private List<Integer> decreaseDays;
+    private int decreaseDayAmount;
     private boolean deathMustDifference;
     private List<String> deathIgnored;
     private List<String> decreaseCause;
@@ -23,8 +27,11 @@ public class ConfigManager {
     private String deathMessagePlayerIgnored;
     private String deathMessagePlayerDecrease;
     private String deathMessagePlayerMaxHealth;
+    private String deathMessagePlayerBanReason;
+    private String deathMessagePlayerKicked;
     private String deathMessageLogServerGained;
     private String deathMessageLogServerDecrease;
+    private String deathMessageLogServerBanReason;
 
     public ConfigManager(Plugin plugin) {
         this.plugin = plugin;
@@ -41,6 +48,10 @@ public class ConfigManager {
         this.decreaseMinEnabled = plugin.getConfig().getBoolean("HP.decrease.min.enabled", false);
         this.decreaseMinAmount = plugin.getConfig().getInt("HP.decrease.min.amount", 2);
         this.decreaseBanTime = plugin.getConfig().getInt("HP.decrease.min.banTime", 24);
+        this.decreaseDayEnabled = plugin.getConfig().getBoolean("HP.decrease.day.enabled", false);
+        this.decreaseDayType = plugin.getConfig().getString("HP.decrease.day.type", "server"); // Add this line
+        this.decreaseDays = plugin.getConfig().getIntegerList("HP.decrease.day.days");
+        this.decreaseDayAmount = plugin.getConfig().getInt("HP.decrease.day.amount", 10);
         this.deathMustDifference = plugin.getConfig().getBoolean("death.must_difference", true);
         this.deathIgnored = plugin.getConfig().getStringList("death.ignored");
         this.decreaseCause = plugin.getConfig().getStringList("death.decrease");
@@ -49,8 +60,11 @@ public class ConfigManager {
         this.deathMessagePlayerIgnored = plugin.getConfig().getString("notifications.death_message.player.ignored");
         this.deathMessagePlayerDecrease = plugin.getConfig().getString("notifications.death_message.player.decrease");
         this.deathMessagePlayerMaxHealth = plugin.getConfig().getString("notifications.death_message.player.maxHealth");
+        this.deathMessagePlayerBanReason = plugin.getConfig().getString("notifications.death_message.player.banReason");
+        this.deathMessagePlayerKicked = plugin.getConfig().getString("notifications.death_message.player.kicked");
         this.deathMessageLogServerGained = plugin.getConfig().getString("notifications.death_message.logServer.gained");
         this.deathMessageLogServerDecrease = plugin.getConfig().getString("notifications.death_message.logServer.decrease");
+        this.deathMessageLogServerBanReason = plugin.getConfig().getString("notifications.death_message.logServer.banReason");
     }
 
     // HP settings
@@ -135,6 +149,22 @@ public class ConfigManager {
         this.decreaseBanTime = decreaseBanTime;
     }
 
+    public boolean isDecreaseDayEnabled() {
+        return decreaseDayEnabled;
+    }
+
+    public String getDecreaseDayType() {
+        return decreaseDayType;
+    }
+
+    public List<Integer> getDecreaseDays() {
+        return decreaseDays;
+    }
+
+    public int getDecreaseDayAmount() {
+        return decreaseDayAmount;
+    }
+
     // Death settings
     public boolean isDeathMustDifference() {
         return deathMustDifference;
@@ -147,7 +177,6 @@ public class ConfigManager {
     public List<String> getDecreaseCause() {
         return decreaseCause;
     }
-
 
     // Notification settings
     public String getDeathMessagePlayerGained() {
@@ -170,11 +199,23 @@ public class ConfigManager {
         return deathMessagePlayerMaxHealth;
     }
 
+    public String getDeathMessagePlayerBanReason() {
+        return deathMessagePlayerBanReason;
+    }
+
+    public String getDeathMessagePlayerKicked() {
+        return deathMessagePlayerKicked;
+    }
+
     public String getDeathMessageLogServerGained() {
         return deathMessageLogServerGained;
     }
 
     public String getDeathMessageLogServerDecrease() {
         return deathMessageLogServerDecrease;
+    }
+
+    public String getDeathMessageLogServerBanReason() {
+        return deathMessageLogServerBanReason;
     }
 }

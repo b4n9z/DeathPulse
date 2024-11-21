@@ -5,6 +5,7 @@ import io.github.b4n9z.deathPulse.Managers.HealthManager;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,6 +13,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.profile.PlayerProfile;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class PlayerDeathListener implements Listener {
@@ -24,7 +26,6 @@ public class PlayerDeathListener implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity().getPlayer();
-        BanEntry entry = null;
         if (player == null) return;
         UUID playerUUID = player.getUniqueId();
         String deathCause = event.getDamageSource().getDamageType().getTranslationKey();
@@ -37,37 +38,61 @@ public class PlayerDeathListener implements Listener {
             return;
         }
 
-        if (plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().getDecreaseCause().contains(deathCause)) {
+        if ((plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().getDecreaseCause().contains(deathCause))
+            || (plugin.getConfigManager().isDecreaseEnabled()
+                && plugin.getConfigManager().isDecreaseDayEnabled()
+                && isMultipleDayDecrease(player)
+            )
+        ) {
             double newMaxHealth = HealthManager.getMaxHealth(player) - plugin.getConfigManager().getDecreasePerDeath();
-            plugin.getDeathDataManager().logDeath(playerUUID, deathCause);
+            String deathCauseMessage = deathCause;
+
+            if (plugin.getConfigManager().isDecreaseDayEnabled() && isMultipleDayDecrease(player)) {
+                int decreaseAmount = plugin.getConfigManager().getDecreaseDayAmount();
+                newMaxHealth = HealthManager.getMaxHealth(player) - decreaseAmount;
+                deathCauseMessage = "decrease_day_" + getCurrentDay(player.getWorld());
+            }
+
+            plugin.getDeathDataManager().logDeath(playerUUID, deathCauseMessage);
+
             if(plugin.getConfigManager().isDecreaseMinEnabled() && newMaxHealth < plugin.getConfigManager().getDecreaseMinAmount()){
                 newMaxHealth = plugin.getConfigManager().getDecreaseMinAmount();
             } else if(!plugin.getConfigManager().isDecreaseMinEnabled() && newMaxHealth <= 0){
-                newMaxHealth = 0;
+                newMaxHealth = 2;
+
                 long durationInMillis = (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000;
                 Date banTime = new Date(System.currentTimeMillis() + durationInMillis);
                 BanList<PlayerProfile> banList = Bukkit.getServer().getBanList(BanList.Type.PROFILE);
                 PlayerProfile playerProfile = player.getPlayerProfile();
                 BanEntry<PlayerProfile> banEntry = banList.getBanEntry(playerProfile);
+
                 if (banEntry == null) {
-                    banList.addBan(playerProfile, "You have been banned due to low health", banTime, null);
+                    banList.addBan(playerProfile, plugin.getConfigManager().getDeathMessagePlayerBanReason(), banTime, null);
                 } else {
                     banEntry.setExpiration(banTime);
                 }
-                player.kickPlayer("You have been banned due to low health");
+
+                plugin.getLogger().info(plugin.getConfigManager().getDeathMessageLogServerBanReason());
+                player.kickPlayer(plugin.getConfigManager().getDeathMessagePlayerKicked().replace("&","§"));
+                HealthManager.setMaxHealth(newMaxHealth, player);
+                return;
             }
+
             HealthManager.setMaxHealth(newMaxHealth, player);
+
             String msgPlayer = plugin.getConfigManager().getDeathMessagePlayerDecrease()
                     .replace("&","§")
                     .replace("{decrease}",String.valueOf(plugin.getConfigManager().getDecreasePerDeath()))
-                    .replace("{cause}",deathCause);
+                    .replace("{cause}",deathCauseMessage);
             String msgServer = plugin.getConfigManager().getDeathMessageLogServerDecrease()
                     .replace("&","§")
                     .replace("{name}",player.getName())
                     .replace("{decrease}",String.valueOf(plugin.getConfigManager().getDecreasePerDeath()))
-                    .replace("{cause}",deathCause);
+                    .replace("{cause}",deathCauseMessage);
+
             player.sendMessage(msgPlayer);
             plugin.getLogger().info(msgServer);
+
             return;
         }
 
@@ -104,5 +129,30 @@ public class PlayerDeathListener implements Listener {
                     .replace("&", "§");
             player.sendMessage(msgPlayerIfMaxHealth);
         }
+    }
+
+    private int getCurrentDay(World world) {
+        String dayType = plugin.getConfigManager().getDecreaseDayType();
+        if ("real".equalsIgnoreCase(dayType)) {
+            // Real-world day calculation
+            long currentTimeMillis = System.currentTimeMillis();
+            return (int) (currentTimeMillis / (1000 * 60 * 60 * 24)); // Days since epoch
+        } else {
+            // Server uptime day calculation
+            long worldTime = world.getFullTime();
+            return (int) (worldTime / 24000); // Days since server start
+        }
+    }
+
+    private boolean isMultipleDayDecrease(Player player) {
+        int currentDay = getCurrentDay(player.getWorld());
+        List<Integer> decreaseDays = plugin.getConfigManager().getDecreaseDays();
+        // Check if today is a decrease day
+        for (int day : decreaseDays) {
+            if (currentDay % day == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

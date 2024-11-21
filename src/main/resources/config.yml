@@ -9,10 +9,15 @@ HP:
   decrease: #decrease HP player when death with certain type
     enabled: false #true or false, when true, player can decrease their HP
     per_death: 2 #HP decrease per player death
+    day: #Decrease day settings
+      enabled: false #true or false, when true, decrease day is active
+      type: "minecraft" # "real" for real-world days, "server" for server uptime days
+      days: [ 5, 7 ] #List of days (as multiples) when decrease day is active
+      amount: 10 #HP decrease per death on decrease day
     min: #HP minimum player when always death with decrease type
       enabled: false #true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
       amount: 2 #Min HP player limit
-      banTime: 24 #Ban time in hours
+      banTime: 24 #Ban time in real life hours
 
 death:
   must_difference: true #true or false, when true, player must die with different way to gained HP
@@ -31,6 +36,9 @@ notifications:
       ignored: "&fDied with &c{cause}&f not gained HP"
       decrease: "&fYou decrease &c{decrease}&f health cause : &c{cause}"
       maxHealth: "&fYou have reached the&c maximum health limit&f."
+      banReason: "You have been banned due to low health" #Ban reason cannot have color
+      kicked: "&fYou have been&c kicked&f due to low health"
     logServer:
       gained: "{name} gained {gain} health by {cause}"
       decrease: "{name} decrease {decrease} health cause : {cause}"
+      banReason: "{name} has been banned due to low health"
