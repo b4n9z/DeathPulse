@@ -11,6 +11,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -97,6 +98,8 @@ public class MatchHealthCommand implements CommandExecutor {
         int decreasePerDeath = plugin.getConfigManager().getDecreasePerDeath();
         Set<String> ignoredDeaths = new HashSet<>(plugin.getConfigManager().getDeathIgnored());
         Set<String> decreaseCauses = new HashSet<>(plugin.getConfigManager().getDecreaseCause());
+        List<Integer> decreaseDays = plugin.getConfigManager().getDecreaseDays();
+        int decreaseDayAmount = plugin.getConfigManager().getDecreaseDayAmount();
 
         long validDeathsCount = deathData.stream()
                 .filter(deathCause -> !ignoredDeaths.contains(deathCause) && !decreaseCauses.contains(deathCause))
@@ -106,7 +109,12 @@ public class MatchHealthCommand implements CommandExecutor {
                 .filter(decreaseCauses::contains)
                 .count();
 
-        int totalHealth = startHealth + (int) (validDeathsCount * gainedPerDeath) - (int) (decreaseDeathsCount * decreasePerDeath);
+        long decreaseDaysCount = deathData.stream()
+                .filter(deathCause -> decreaseDays.stream()
+                        .anyMatch(day -> deathCause.contains("decrease_day_" + day)))
+                .count();
+
+        int totalHealth = startHealth + (int) (validDeathsCount * gainedPerDeath) - (int) (decreaseDeathsCount * decreasePerDeath) - (int) (decreaseDaysCount * decreaseDayAmount);
 
         if (plugin.getConfigManager().isGainedMaxEnabled()){
             totalHealth = Math.min(totalHealth, plugin.getConfigManager().getGainedMaxAmount());

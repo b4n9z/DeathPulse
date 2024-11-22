@@ -53,7 +53,13 @@ public class PlayerDeathListener implements Listener {
                 deathCauseMessage = "decrease_day_" + getCurrentDay(player.getWorld());
             }
 
-            plugin.getDeathDataManager().logDeath(playerUUID, deathCauseMessage);
+            if (plugin.getConfigManager().getDecreasePerDeath() == 0 && plugin.getConfigManager().isDecreaseDayEnabled()) {
+                if (isMultipleDayDecrease(player)) {
+                    plugin.getDeathDataManager().logDeath(playerUUID, deathCauseMessage);
+                }
+            } else {
+                plugin.getDeathDataManager().logDeath(playerUUID, deathCauseMessage);
+            }
 
             if(plugin.getConfigManager().isDecreaseMinEnabled() && newMaxHealth < plugin.getConfigManager().getDecreaseMinAmount()){
                 newMaxHealth = plugin.getConfigManager().getDecreaseMinAmount();
