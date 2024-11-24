@@ -8,13 +8,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 
 import java.util.UUID;
-import java.util.logging.Logger;
 
 public class RemoveDeathDataCommand implements CommandExecutor {
     private final DeathPulse plugin;
@@ -62,10 +59,16 @@ public class RemoveDeathDataCommand implements CommandExecutor {
     private void confirmRemoveSingle(CommandSender sender, OfflinePlayer player) {
         TextComponent message = new TextComponent("Are you sure you want to remove death data for " + player.getName() + "? ");
         TextComponent yes = new TextComponent("[YES]");
-        yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/DeathPulse confirmRemoveDeathData " + player.getUniqueId()));
-        TextComponent no = new TextComponent("[NO]");
-        no.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/DeathPulse cancelRemoveDeathData"));
+        yes.setColor(net.md_5.bungee.api.ChatColor.GREEN);
+        yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse confirmRemoveDeathData " + player.getUniqueId()));
 
+        TextComponent no = new TextComponent("[NO]");
+        no.setColor(net.md_5.bungee.api.ChatColor.RED);
+        no.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse cancelRemoveDeathData"));
+
+        TextComponent newline = new TextComponent("\n");
+
+        message.addExtra(newline);
         message.addExtra(yes);
         message.addExtra(" ");
         message.addExtra(no);
@@ -76,10 +79,16 @@ public class RemoveDeathDataCommand implements CommandExecutor {
     private void confirmRemoveAll(CommandSender sender) {
         TextComponent message = new TextComponent("Are you sure you want to remove death data for all players? ");
         TextComponent yes = new TextComponent("[YES]");
-        yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/DeathPulse confirmRemoveAllDeathData"));
-        TextComponent no = new TextComponent("[NO]");
-        no.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/DeathPulse cancelRemoveDeathData"));
+        yes.setColor(net.md_5.bungee.api.ChatColor.GREEN);
+        yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse confirmRemoveAllDeathData"));
 
+        TextComponent no = new TextComponent("[NO]");
+        no.setColor(net.md_5.bungee.api.ChatColor.RED);
+        no.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse cancelRemoveDeathData"));
+
+        TextComponent newline = new TextComponent("\n");
+
+        message.addExtra(newline);
         message.addExtra(yes);
         message.addExtra(" ");
         message.addExtra(no);

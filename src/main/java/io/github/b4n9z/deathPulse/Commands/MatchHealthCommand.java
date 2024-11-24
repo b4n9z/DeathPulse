@@ -102,7 +102,7 @@ public class MatchHealthCommand implements CommandExecutor {
         int decreaseDayAmount = plugin.getConfigManager().getDecreaseDayAmount();
 
         long validDeathsCount = deathData.stream()
-                .filter(deathCause -> !ignoredDeaths.contains(deathCause) && !decreaseCauses.contains(deathCause))
+                .filter(deathCause -> !ignoredDeaths.contains(deathCause) && !decreaseCauses.contains(deathCause) && decreaseDays.stream().noneMatch(day -> deathCause.contains("decrease_day_" + day)))
                 .count();
 
         long decreaseDeathsCount = deathData.stream()

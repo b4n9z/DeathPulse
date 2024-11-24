@@ -44,13 +44,17 @@ public class PlayerDeathListener implements Listener {
                 && isMultipleDayDecrease(player)
             )
         ) {
-            double newMaxHealth = HealthManager.getMaxHealth(player) - plugin.getConfigManager().getDecreasePerDeath();
+            int decreaseAmount;
+            decreaseAmount = plugin.getConfigManager().getDecreasePerDeath();
+            double newMaxHealth = HealthManager.getMaxHealth(player) - decreaseAmount;
             String deathCauseMessage = deathCause;
 
             if (plugin.getConfigManager().isDecreaseDayEnabled() && isMultipleDayDecrease(player)) {
-                int decreaseAmount = plugin.getConfigManager().getDecreaseDayAmount();
+                decreaseAmount = plugin.getConfigManager().getDecreaseDayAmount();
                 newMaxHealth = HealthManager.getMaxHealth(player) - decreaseAmount;
-                deathCauseMessage = "decrease_day_" + getCurrentDay(player.getWorld());
+                int currentDay = getCurrentDay(player.getWorld());
+                int deathCounter = plugin.getDeathDataManager().getNextDeathCounter(playerUUID, currentDay);
+                deathCauseMessage = "decrease_day_" + currentDay + "_" + deathCounter;
             }
 
             if (plugin.getConfigManager().getDecreasePerDeath() == 0 && plugin.getConfigManager().isDecreaseDayEnabled()) {
@@ -88,12 +92,12 @@ public class PlayerDeathListener implements Listener {
 
             String msgPlayer = plugin.getConfigManager().getDeathMessagePlayerDecrease()
                     .replace("&","§")
-                    .replace("{decrease}",String.valueOf(plugin.getConfigManager().getDecreasePerDeath()))
+                    .replace("{decrease}",String.valueOf(decreaseAmount))
                     .replace("{cause}",deathCauseMessage);
             String msgServer = plugin.getConfigManager().getDeathMessageLogServerDecrease()
                     .replace("&","§")
                     .replace("{name}",player.getName())
-                    .replace("{decrease}",String.valueOf(plugin.getConfigManager().getDecreasePerDeath()))
+                    .replace("{decrease}",String.valueOf(decreaseAmount))
                     .replace("{cause}",deathCauseMessage);
 
             player.sendMessage(msgPlayer);
