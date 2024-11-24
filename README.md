@@ -1,9 +1,9 @@
 # DeathPulse Plugin
 
-![Minecraft](https://img.shields.io/badge/Minecraft-1.21-green.svg)
-![Bukkit](https://img.shields.io/badge/Bukkit-1.21_Spigot--API-red.svg)
-![Spigot](https://img.shields.io/badge/Spigot-1.21_Spigot--API-orange.svg)
-![Paper](https://img.shields.io/badge/Paper-1.21_Spigot--API-blue.svg)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.21.x-green.svg)
+![Bukkit](https://img.shields.io/badge/Bukkit-1.21.x_Spigot--API-red.svg)
+![Spigot](https://img.shields.io/badge/Spigot-1.21.x_Spigot--API-orange.svg)
+![Paper](https://img.shields.io/badge/Paper-1.21.x_Spigot--API-blue.svg)
 <!-- ![License](https://img.shields.io/badge/License-Apache--2.0-green.svg) -->
 
 This `README.md` provides a comprehensive guide to using the DeathPulse plugin, including installation instructions, command usage, permissions, configuration details, and feature explanations. It also invites users to contribute and offers a constructive outlook on potential improvements.
@@ -23,7 +23,7 @@ This `README.md` provides a comprehensive guide to using the DeathPulse plugin, 
 DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying player health mechanics upon death. The plugin allows server administrators to configure health gained or lost when players die, providing a unique twist to the game.
 
 ## Installation
-1. Download the latest version of the DeathPulse plugin <!-- from the [releases page](#) -->.
+1. Download the latest version of the DeathPulse plugin from the [releases page](https://github.com/b4n9z/DeathPulse/releases).
 2. Place the downloaded JAR file into your server's `plugins` directory.
 3. Start or restart your Minecraft server.
 4. The plugin will generate a default configuration file in the `plugins/DeathPulse` directory.
@@ -127,10 +127,15 @@ HP:
   decrease: #decrease HP player when death with certain type
     enabled: false #true or false, when true, player can decrease their HP
     per_death: 2 #HP decrease per player death
+    day: #Decrease day settings
+      enabled: false #true or false, when true, decrease day is active
+      type: "minecraft" # "real" for real-world days, "server" for server uptime days
+      days: [ 5, 7 ] #List of days (as multiples) when decrease day is active
+      amount: 10 #HP decrease per death on decrease day
     min: #HP minimum player when always death with decrease type
       enabled: false #true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
       amount: 2 #Min HP player limit
-      banTime: 24 #Ban time in hours
+      banTime: 24 #Ban time in real life hours
 
 death:
   must_difference: true #true or false, when true, player must die with different way to gained HP
@@ -149,9 +154,12 @@ notifications:
       ignored: "&fDied with &c{cause}&f not gained HP"
       decrease: "&fYou decrease &c{decrease}&f health cause : &c{cause}"
       maxHealth: "&fYou have reached the&c maximum health limit&f."
+      banReason: "You have been banned due to low health" #Ban reason cannot have color
+      kicked: "&fYou have been&c kicked&f due to low health"
     logServer:
       gained: "{name} gained {gain} health by {cause}"
       decrease: "{name} decrease {decrease} health cause : {cause}"
+      banReason: "{name} has been banned due to low health"
 ```
 ## Features
 - **Health Gain**: Players gain health upon death.
@@ -161,6 +169,7 @@ notifications:
 - **First Join Health**: Set the health players start with on their first join.
 - **Maximum Health Limit**: Set a maximum health limit that players can reach.
 - **Minimum Health Limit/Ban**: Set a minimum health limit, or ban players when their health drops to zero.
+- **Day Decrease**: Allows configuration of specific days when health decrease is active, regardless of the cause of death. To activate this feature, you must enable the main `decrease` setting and day setting. If you only want to decrease health on specified days without affecting player health on other days, set `per_death` in the `decrease` settings to 0.
 - **Health Matching**: Match the health of a specified player or all players based on their death data.
 - **Death Data Management**: Remove death data of a specified player or all players.
 - **Configuration Reload**: Reload the plugin configuration without restarting the server.
