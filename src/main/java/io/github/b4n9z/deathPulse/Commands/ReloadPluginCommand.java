@@ -19,15 +19,15 @@ public class ReloadPluginCommand implements CommandExecutor {
             if (player.isOp() || player.hasPermission("dp.reload")) {
                 plugin.reloadConfig();
                 plugin.loadConfigManager();
-                player.sendMessage("Plugin reloaded successfully.");
+                player.sendMessage("§fPlugin reloaded§a successfully.");
             } else {
-                player.sendMessage("You do not have permission to use this command.");
+                player.sendMessage("§fYou§c do not have permission§f to use this command.");
             }
         } else {
             // If run from console
             plugin.reloadConfig();
             plugin.loadConfigManager();
-            sender.sendMessage("Plugin reloaded successfully.");
+            sender.sendMessage("§fPlugin reloaded§a successfully.");
         }
         return true;
     }

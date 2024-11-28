@@ -24,16 +24,16 @@ public class RemoveDeathDataCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
             if (!(player.isOp()) || !(player.hasPermission("dp.removeDeathData"))) {
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length != 2) {
-            sender.sendMessage("Usage: /DeathPulse removeDeathData <player|allPlayer>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b removeDeathData§f <player|allPlayer>");
             return false;
         }
 
@@ -45,7 +45,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
             if (targetPlayer == null) {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(target));
                 if (!offlinePlayer.hasPlayedBefore()) {
-                    sender.sendMessage("Player not found.");
+                    sender.sendMessage("§cPlayer not found.");
                     return true;
                 }
                 confirmRemoveSingle(sender, offlinePlayer);
@@ -57,7 +57,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
     }
 
     private void confirmRemoveSingle(CommandSender sender, OfflinePlayer player) {
-        TextComponent message = new TextComponent("Are you sure you want to remove death data for " + player.getName() + "? ");
+        TextComponent message = new TextComponent("§fAre§b you§f sure§b you§f want to remove§e death data§f for§b " + player.getName() + "§f? ");
         TextComponent yes = new TextComponent("[YES]");
         yes.setColor(net.md_5.bungee.api.ChatColor.GREEN);
         yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse confirmRemoveDeathData " + player.getUniqueId()));
@@ -77,7 +77,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
     }
 
     private void confirmRemoveAll(CommandSender sender) {
-        TextComponent message = new TextComponent("Are you sure you want to remove death data for all players? ");
+        TextComponent message = new TextComponent("§fAre§b you§f sure§b you§f want to remove§e death data§f for§b all players§f? ");
         TextComponent yes = new TextComponent("[YES]");
         yes.setColor(net.md_5.bungee.api.ChatColor.GREEN);
         yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse confirmRemoveAllDeathData"));

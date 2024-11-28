@@ -22,47 +22,54 @@ public class ResetHealthCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.resetHealth"))){
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length != 2) {
-            sender.sendMessage("Usage: /DeathPulse resetHealth <player|allPlayer>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b resetHealth§f <player|allPlayer>");
             return true;
         }
 
-        int startHealth = plugin.getConfigManager().getHpStart();
+        int startHealth;
+        try {
+            startHealth = plugin.getConfigManager().getHpStart();
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§cInvalid health amount.");
+            return true;
+        }
+
         if (args[1].equalsIgnoreCase("allPlayer")) {
             // Reset health for all players
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 HealthManager.setMaxHealth(startHealth, onlinePlayer);
-                onlinePlayer.sendMessage("Your health has been reset to " + startHealth + " by an admin.");
+                onlinePlayer.sendMessage("§bYour§f health has been reset to§d " + startHealth + "§b by an admin.");
             }
 
             for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
                 HealthManager.setOfflinePlayerMaxHealth(startHealth, offlinePlayer);
             }
 
-            sender.sendMessage("All players' health has been reset to " + startHealth);
+            sender.sendMessage("§bAll players'§f health has been reset to§d " + startHealth);
         } else {
             // Reset health for specified player
             Player targetPlayer = Bukkit.getPlayer(args[1]);
             if (targetPlayer == null) {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(args[1]));
                 if (!offlinePlayer.hasPlayedBefore()) {
-                    sender.sendMessage("Player not found.");
+                    sender.sendMessage("§cPlayer not found.");
                     return true;
                 }
                 HealthManager.setOfflinePlayerMaxHealth(startHealth, offlinePlayer);
-                sender.sendMessage("Set " + offlinePlayer.getName() + "'s health to " + startHealth);
+                sender.sendMessage("§fSet§b " + offlinePlayer.getName() + "'s§f health to§d " + startHealth);
             } else {
                 HealthManager.setMaxHealth(startHealth, targetPlayer);
-                targetPlayer.sendMessage("Your health has been reset to " + startHealth + " by an admin.");
-                sender.sendMessage("Set " + targetPlayer.getName() + "'s health to " + startHealth);
+                targetPlayer.sendMessage("§bYour§f health has been reset to§d " + startHealth + "§b by an admin.");
+                sender.sendMessage("§fSet§b " + targetPlayer.getName() + "'s§f health to§d " + startHealth);
             }
         }
         return true;

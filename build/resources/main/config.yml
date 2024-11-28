@@ -1,30 +1,30 @@
 # config.yml
 HP:
-  start: 20 #Sart HP player
+  start: 20 # Starting HP for players
   gained:
-    per_death: 2 #HP Gained per player death
+    per_death: 2 # HP Gained per player death
     max:
-      enabled: false #Max HP player, true or false, when true, player has max HP limit
-      amount: 114 #Max HP player limit
+      enabled: false # Enable max HP limit (true or false), when true, player has max HP limit
+      amount: 114 # Max HP limit for players
   decrease: #decrease HP player when death with certain type
-    enabled: false #true or false, when true, player can decrease their HP
-    per_death: 2 #HP decrease per player death
-    day: #Decrease day settings
-      enabled: false #true or false, when true, decrease day is active
+    enabled: false # true or false, when true, player can decrease their HP
+    per_death: 2 # HP decrease per player death
+    day: # Decrease day settings
+      enabled: false # true or false, when true, decrease day is active
       type: "minecraft" # "real" for real-world days, "server" for server uptime days
-      days: [ 5, 7 ] #List of days (as multiples) when decrease day is active
-      amount: 10 #HP decrease per death on decrease day
-    min: #HP minimum player when always death with decrease type
-      enabled: false #true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
-      amount: 2 #Min HP player limit
-      banTime: 24 #Ban time in real life hours
+      days: [ 5, 7 ] # List of days (as multiples) when decrease day is active
+      amount: 10 # HP decrease per death on decrease day
+    min: # HP minimum player when always death with decrease type
+      enabled: false # true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
+      amount: 2 # Min HP player limit
+      banTime: 24 # Ban time in real life hours
 
 death:
-  must_difference: true #true or false, when true, player must die with different way to gained HP
-  ignored: #Ignored death type cause player not gain HP
+  must_difference: true # true or false, when true, player must die with different way to gained HP
+  ignored: # Ignored death type cause player not gain HP
   #  - lava
   #  - fall
-  decrease: #decrease HP player when death with certain type
+  decrease: # decrease HP player when death with certain type
   #  - lava
   #  - fall
 

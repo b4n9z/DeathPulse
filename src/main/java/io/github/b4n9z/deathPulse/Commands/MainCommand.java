@@ -36,13 +36,13 @@ public class MainCommand implements CommandExecutor {
         this.setGainedMaxCommand = new SetGainedMaxCommand(plugin);
         this.setDecreaseCommand = new SetDecreaseCommand(plugin);
         this.setDecreaseMinCommand = new SetDecreaseMinCommand(plugin);
-        this.helpCommand = new HelpCommand();
+        this.helpCommand = new HelpCommand(plugin);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("Please specify a subcommand.");
+            sender.sendMessage("§cPlease specify a subcommand.");
             return false;
         }
 
@@ -56,29 +56,29 @@ public class MainCommand implements CommandExecutor {
             case "removeDeathData" -> removeDeathDataCommand.onCommand(sender, command, label, args);
             case "confirmRemoveDeathData" -> {
                 if (args.length != 2) {
-                    sender.sendMessage("Usage: /DeathPulse confirmRemoveDeathData <playerUUID>");
+                    sender.sendMessage("§fUsage:§c /DeathPulse§b confirmRemoveDeathData§f <playerUUID>");
                     yield false;
                 }
                 UUID playerUUID = UUID.fromString(args[1]);
                 boolean success = plugin.getDeathDataManager().removePlayerDeathData(playerUUID);
                 if (success) {
-                    sender.sendMessage("Death data for player " + Bukkit.getOfflinePlayer(playerUUID).getName() + " has been removed.");
+                    sender.sendMessage("§bDeath data§f for player§b " + Bukkit.getOfflinePlayer(playerUUID).getName() + "§f has been§c removed§f.");
                 } else {
-                    sender.sendMessage("Failed to remove death data for player " + Bukkit.getOfflinePlayer(playerUUID).getName() + ". Please try again.");
+                    sender.sendMessage("§cFailed to remove§b death data§f for player§b " + Bukkit.getOfflinePlayer(playerUUID).getName() + "§f. §cPlease try again.");
                 }
                 yield true;
             }
             case "confirmRemoveAllDeathData" -> {
                 boolean success = plugin.getDeathDataManager().removeAllDeathData();
                 if (success) {
-                    sender.sendMessage("Death data for all players has been removed.");
+                    sender.sendMessage("§bDeath data§f for§b all players§f has been§c removed§f.");
                 } else {
-                    sender.sendMessage("Failed to remove death data for all players. Please try again.");
+                    sender.sendMessage("§cFailed to remove§b death data§f for§b all players§f.§c Please try again.");
                 }
                 yield true;
             }
             case "cancelRemoveDeathData" -> {
-                sender.sendMessage("Death data removal cancelled.");
+                sender.sendMessage("§bDeath data§f removal has been§c cancelled.");
                 yield true;
             }
             case "setStartHealth" -> setStartHealthCommand.onCommand(sender, command, label, args);
@@ -88,7 +88,7 @@ public class MainCommand implements CommandExecutor {
             case "setDecreaseMin" -> setDecreaseMinCommand.onCommand(sender, command, label, args);
             case "help" -> helpCommand.onCommand(sender, command, label, args);
             default -> {
-                sender.sendMessage("Unknown subcommand.");
+                sender.sendMessage("§cUnknown subcommand.");
                 yield true;
             }
         };

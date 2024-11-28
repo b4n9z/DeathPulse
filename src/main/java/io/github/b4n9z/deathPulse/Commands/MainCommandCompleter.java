@@ -71,20 +71,17 @@ public class MainCommandCompleter implements TabCompleter {
                     completions.add(player.getName());
                 }
             } else if (args[0].equalsIgnoreCase("setStartHealth") || args[0].equalsIgnoreCase("setGainedPerDeath")) {
-                // Autocomplete numbers
-                completions.add("<amount>");
+                completions.add("[<amount>]");
             } else if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setDecrease") || args[0].equalsIgnoreCase("setDecreaseMin")) {
-                // Autocomplete numbers
+                // Autocomplete boolean
                 completions.add("true");
                 completions.add("false");
             }
         } else if (args.length == 3) {
             if (args[0].equalsIgnoreCase("setGainedMax") || args[0].equalsIgnoreCase("setHealth") || args[0].equalsIgnoreCase("setDecreaseMin")) {
-                // Autocomplete numbers
-                completions.add("<amount>");
+                completions.add("[<amount>]");
             } else if (args[0].equalsIgnoreCase("setDecrease")) {
-                // Autocomplete numbers
-                completions.add("<perDeathAmount>");
+                completions.add("[<perDeathAmount>]");
             }
         }
         return completions;

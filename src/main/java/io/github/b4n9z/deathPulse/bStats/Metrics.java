@@ -12,7 +12,7 @@
  *
  * Violations will result in a ban of your plugin and account from bStats.
  */
-package io.github.b4n9z.deathPulse;
+package io.github.b4n9z.deathPulse.bStats;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

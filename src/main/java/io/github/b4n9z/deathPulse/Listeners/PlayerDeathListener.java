@@ -69,21 +69,7 @@ public class PlayerDeathListener implements Listener {
                 newMaxHealth = plugin.getConfigManager().getDecreaseMinAmount();
             } else if(!plugin.getConfigManager().isDecreaseMinEnabled() && newMaxHealth <= 0){
                 newMaxHealth = 2;
-
-                long durationInMillis = (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000;
-                Date banTime = new Date(System.currentTimeMillis() + durationInMillis);
-                BanList<PlayerProfile> banList = Bukkit.getServer().getBanList(BanList.Type.PROFILE);
-                PlayerProfile playerProfile = player.getPlayerProfile();
-                BanEntry<PlayerProfile> banEntry = banList.getBanEntry(playerProfile);
-
-                if (banEntry == null) {
-                    banList.addBan(playerProfile, plugin.getConfigManager().getDeathMessagePlayerBanReason(), banTime, null);
-                } else {
-                    banEntry.setExpiration(banTime);
-                }
-
-                plugin.getLogger().info(plugin.getConfigManager().getDeathMessageLogServerBanReason());
-                player.kickPlayer(plugin.getConfigManager().getDeathMessagePlayerKicked().replace("&","§"));
+                banPlayer(player);
                 HealthManager.setMaxHealth(newMaxHealth, player);
                 return;
             }
@@ -164,5 +150,22 @@ public class PlayerDeathListener implements Listener {
             }
         }
         return false;
+    }
+
+    private void banPlayer(Player player) {
+        long durationInMillis = (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000;
+        Date banTime = new Date(System.currentTimeMillis() + durationInMillis);
+        BanList<PlayerProfile> banList = Bukkit.getServer().getBanList(BanList.Type.PROFILE);
+        PlayerProfile playerProfile = player.getPlayerProfile();
+        BanEntry<PlayerProfile> banEntry = banList.getBanEntry(playerProfile);
+
+        if (banEntry == null) {
+            banList.addBan(playerProfile, plugin.getConfigManager().getDeathMessagePlayerBanReason(), banTime, null);
+        } else {
+            banEntry.setExpiration(banTime);
+        }
+
+        plugin.getLogger().info(plugin.getConfigManager().getDeathMessageLogServerBanReason());
+        player.kickPlayer(plugin.getConfigManager().getDeathMessagePlayerKicked().replace("&","§"));
     }
 }

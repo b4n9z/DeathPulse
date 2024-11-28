@@ -17,32 +17,32 @@ public class SetGainedPerDeathCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.setGainedPerDeath"))){
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length != 2) {
-            sender.sendMessage("Usage: /DeathPulse setGainedPerDeath <amount>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b setGainedPerDeath§f <amount>");
             return true;
         }
 
         try {
             int newGainedPerDeath = Integer.parseInt(args[1]);
             if (newGainedPerDeath <= 0) {
-                sender.sendMessage("Gained per death amount must be positive.");
+                sender.sendMessage("§cGained per death amount must be positive.");
                 return true;
             }
             plugin.getConfigManager().setGainedPerDeath(newGainedPerDeath);
             plugin.saveConfig();
             plugin.reloadConfig();
-            sender.sendMessage("Gained per death set to " + newGainedPerDeath);
-            sender.sendMessage("Reload the plugin or restart the server for changes to take effect.");
+            sender.sendMessage("§fGained per death set to§d " + newGainedPerDeath);
+            sender.sendMessage("§cReload the plugin§f or§c restart the server§f for changes to take effect.");
         } catch (NumberFormatException e) {
-            sender.sendMessage("Invalid health amount.");
+            sender.sendMessage("§cInvalid health amount.");
         }
         return true;
     }

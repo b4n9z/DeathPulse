@@ -17,32 +17,32 @@ public class SetStartHealthCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.setStartHealth"))) {
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length != 2) {
-            sender.sendMessage("Usage: /DeathPulse setStartHealth <amount>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b setStartHealth§f <amount>");
             return true;
         }
 
         try {
             int newStartHealth = Integer.parseInt(args[1]);
             if (newStartHealth <= 0) {
-                sender.sendMessage("Start Health amount must be positive.");
+                sender.sendMessage("§cStart Health amount must be positive.");
                 return true;
             }
             plugin.getConfigManager().setHpStart(newStartHealth);
             plugin.saveConfig();
             plugin.reloadConfig();
-            sender.sendMessage("Start health set to " + newStartHealth);
-            sender.sendMessage("Reload the plugin or restart the server for changes to take effect.");
+            sender.sendMessage("§fStart health set to§d " + newStartHealth);
+            sender.sendMessage("§cReload the plugin§f or§c restart the server§f for changes to take effect.");
         } catch (NumberFormatException e) {
-            sender.sendMessage("Invalid health amount.");
+            sender.sendMessage("§cInvalid health amount.");
         }
 
         return true;

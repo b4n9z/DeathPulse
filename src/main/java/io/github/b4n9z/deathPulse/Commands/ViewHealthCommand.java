@@ -24,37 +24,37 @@ public class ViewHealthCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.viewHealth"))) {
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length != 2) {
-            sender.sendMessage("Usage: /DeathPulse viewHealth <player>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b viewHealth§f <player>");
             return true;
         }
 
         Player targetPlayer = Bukkit.getPlayer(args[1]);
         if (targetPlayer == null) {
-            sender.sendMessage("Player " + args[1] +" not found or not online.");
+            sender.sendMessage("§fPlayer§b " + args[1] +"§c not found§f or§c not online§f.");
             return true;
         }
 
         double currentHealth = HealthManager.getHealth(targetPlayer);
         double maxPlayerHealth = HealthManager.getMaxHealth(targetPlayer);
 
-        sender.sendMessage(targetPlayer.getName() + " currently has " + currentHealth + " health out of " + maxPlayerHealth + " their max health.");
+        sender.sendMessage("§b" + targetPlayer.getName() + "§f currently has§d " + currentHealth + "§f health out of§d " + maxPlayerHealth + "§f their max health.");
 
         UUID targetUUID = targetPlayer.getUniqueId();
         Set<String> deathData = plugin.getDeathDataManager().loadPlayerDeaths(targetUUID);
 
         if (deathData.isEmpty()) {
-            sender.sendMessage(targetPlayer.getName() + " has no recorded death data.");
+            sender.sendMessage("§b" + targetPlayer.getName() + "§c has no recorded§f death data.");
         } else {
-            sender.sendMessage(targetPlayer.getName() + "'s death data:");
+            sender.sendMessage("§b" + targetPlayer.getName() + "'s§f death data:§e");
             for (String deathCause : deathData) {
                 sender.sendMessage("- " + deathCause);
             }

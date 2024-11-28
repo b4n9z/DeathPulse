@@ -17,19 +17,19 @@ public class SetDecreaseCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.setDecrease"))){
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length < 2) {
-            sender.sendMessage("Usage: /DeathPulse setDecrease <true/false> <perDeathAmount>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b setDecrease§f <true/false> <perDeathAmount>");
             return true;
         } else if ((args[1].equalsIgnoreCase("true")) && (args.length != 3)) {
-            sender.sendMessage("When Decrease set to true, you must input perDeathAmount.");
+            sender.sendMessage("§fWhen Decrease set to§a true§f,§b you§c must input§d perDeathAmount§f.");
             return true;
         }
 
@@ -37,24 +37,24 @@ public class SetDecreaseCommand implements CommandExecutor {
         try {
             decreaseEnabled = Boolean.parseBoolean(args[1]);
         } catch (Exception e) {
-            sender.sendMessage("Invalid value for decrease enabled. Use true or false.");
+            sender.sendMessage("§cInvalid value for decrease enabled. Use true or false.");
             return true;
         }
 
         int newDecreasePerDeath = 0;
         if (decreaseEnabled) {
             if (args.length != 3) {
-                sender.sendMessage("When Decrease set to true, you must input perDeathAmount.");
+                sender.sendMessage("§fWhen Decrease set to§a true§f,§b you§c must§f input§d perDeathAmount§f.");
                 return true;
             }
             try {
                 newDecreasePerDeath = Integer.parseInt(args[2]);
                 if (newDecreasePerDeath <= 0) {
-                    sender.sendMessage("Decrease per death amount must be positive.");
+                    sender.sendMessage("§cDecrease per death amount must be positive.");
                     return true;
                 }
             } catch (NumberFormatException e) {
-                sender.sendMessage("Invalid Format Number for perDeathAmount.");
+                sender.sendMessage("§cInvalid Format Number for perDeathAmount.");
                 return true;
             }
         }
@@ -65,8 +65,8 @@ public class SetDecreaseCommand implements CommandExecutor {
         }
         plugin.saveConfig();
         plugin.reloadConfig();
-        sender.sendMessage("Decrease set to " + args[1] + (decreaseEnabled ? " with Health per death " + args[2] : ""));
-        sender.sendMessage("Reload the plugin or restart the server for changes to take effect.");
+        sender.sendMessage("§fDecrease set to " + args[1] + (decreaseEnabled ? " with Health per death§d " + args[2] : ""));
+        sender.sendMessage("§cReload the plugin§f or§c restart the server§f for changes to take effect.");
 
         return true;
     }

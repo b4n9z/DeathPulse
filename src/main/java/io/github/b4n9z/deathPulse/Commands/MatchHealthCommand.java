@@ -26,16 +26,16 @@ public class MatchHealthCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.matchHealth"))){
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length != 2) {
-            sender.sendMessage("Usage: /DeathPulse matchHealth <player|allPlayer>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b matchHealth§f <player|allPlayer>");
             return true;
         }
 
@@ -49,14 +49,14 @@ public class MatchHealthCommand implements CommandExecutor {
                 matchOfflinePlayerHealth(offlinePlayer, sender);
             }
 
-            sender.sendMessage("All players' health has been matched based on their death data.");
+            sender.sendMessage("§bAll players'§f health has been matched based on their§e death data§f.");
         } else {
             // Match health for specified player based on their death data
             Player targetPlayer = Bukkit.getPlayer(args[1]);
             if (targetPlayer == null) {
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(args[1]));
                 if (!offlinePlayer.hasPlayedBefore()) {
-                    sender.sendMessage("Player not found.");
+                    sender.sendMessage("§cPlayer not found.");
                     return true;
                 }
                 matchOfflinePlayerHealth(offlinePlayer, sender);
@@ -71,12 +71,12 @@ public class MatchHealthCommand implements CommandExecutor {
         UUID playerUUID = player.getUniqueId();
         Set<String> deathData = plugin.getDeathDataManager().loadPlayerDeaths(playerUUID);
         if (deathData.isEmpty()) {
-            sender.sendMessage(player.getName() + " has no recorded death data.");
+            sender.sendMessage("§b" + player.getName() + "§c has no recorded§e death data.");
         } else {
             int matchedHealth = calculateHealthFromDeathData(deathData);
             HealthManager.setMaxHealth(matchedHealth, player);
-            player.sendMessage("Your health has been matched to " + matchedHealth + " based on your death data.");
-            sender.sendMessage("Set " + player.getName() + "'s health to " + matchedHealth + " based on their death data.");
+            player.sendMessage("§bYour§f health has been matched to§d " + matchedHealth + "§f based on your§e death data.");
+            sender.sendMessage("§fSet§b " + player.getName() + "'s§f health to§d " + matchedHealth + "§f based on their§e death data.");
         }
     }
 
@@ -84,11 +84,11 @@ public class MatchHealthCommand implements CommandExecutor {
         UUID playerUUID = player.getUniqueId();
         Set<String> deathData = plugin.getDeathDataManager().loadPlayerDeaths(playerUUID);
         if (deathData.isEmpty()) {
-            sender.sendMessage(player.getName() + " has no recorded death data.");
+            sender.sendMessage("§b" + player.getName() + "§c has no recorded§e death data.");
         } else {
             int matchedHealth = calculateHealthFromDeathData(deathData);
             HealthManager.setOfflinePlayerMaxHealth(matchedHealth, player);
-            sender.sendMessage("Set " + player.getName() + "'s health to " + matchedHealth + " based on their death data.");
+            sender.sendMessage("§fSet§b " + player.getName() + "'s§f health to§b " + matchedHealth + "§f based on their§e death data.");
         }
     }
 

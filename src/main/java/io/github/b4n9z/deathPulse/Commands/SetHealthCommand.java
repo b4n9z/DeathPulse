@@ -23,16 +23,16 @@ public class SetHealthCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
             if (!(player.isOp()) || !(player.hasPermission("dp.setHealth"))) {
-                sender.sendMessage("You do not have permission to use this command.");
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
         } else if (!(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage("This command can only be run by a player or from the console.");
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
             return false;
         }
 
         if (args.length != 3) {
-            sender.sendMessage("Usage: /DeathPulse setHealth <player> <amount>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b setHealth§f <player> <amount>");
             return true;
         }
 
@@ -42,30 +42,30 @@ public class SetHealthCommand implements CommandExecutor {
         try {
             newHealth = Double.parseDouble(args[2]);
         } catch (NumberFormatException e) {
-            sender.sendMessage("Invalid health amount.");
+            sender.sendMessage("§cInvalid health amount.");
             return true;
         }
 
         if (newHealth > plugin.getConfigManager().getGainedMaxAmount()) {
-            sender.sendMessage("Health amount exceeds the max limit (" + plugin.getConfigManager().getGainedMaxAmount() + ").");
+            sender.sendMessage("§fHealth amount§c exceeds§f the max limit (§c" + plugin.getConfigManager().getGainedMaxAmount() + "§f).");
             return true;
         } else if (newHealth < plugin.getConfigManager().getDecreaseMinAmount()) {
-            sender.sendMessage("Health amount under the min limit (" +  plugin.getConfigManager().getDecreaseMinAmount() + ").");
+            sender.sendMessage("§fHealth amount is§c under§f the min limit (§c" +  plugin.getConfigManager().getDecreaseMinAmount() + "§f).");
             return true;
         }
 
         if (targetPlayer == null) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(targetPlayerName));
             if (!offlinePlayer.hasPlayedBefore()) {
-                sender.sendMessage("Player not found.");
+                sender.sendMessage("§cPlayer not found.");
                 return false;
             }
             HealthManager.setOfflinePlayerMaxHealth(newHealth, offlinePlayer);
-            sender.sendMessage("Set " + offlinePlayer.getName() + "'s health to " + newHealth);
+            sender.sendMessage("§fSet§b " + offlinePlayer.getName() + "'s§f health to§d " + newHealth);
         } else {
             HealthManager.setMaxHealth(newHealth, targetPlayer);
-            targetPlayer.sendMessage("Your health has been set to " + newHealth + " by an admin.");
-            sender.sendMessage("Set " + targetPlayer.getName() + "'s health to " + newHealth);
+            targetPlayer.sendMessage("§bYour§f health has been set to§d " + newHealth + "§b by an admin.");
+            sender.sendMessage("§fSet§b " + targetPlayer.getName() + "'s§f health to§d " + newHealth);
         }
 
         return true;
