@@ -49,7 +49,7 @@ public class SetDecreaseCommand implements CommandExecutor {
             }
             try {
                 newDecreasePerDeath = Integer.parseInt(args[2]);
-                if (newDecreasePerDeath <= 0) {
+                if (newDecreasePerDeath < 0) {
                     sender.sendMessage("§cDecrease per death amount must be positive.");
                     return true;
                 }

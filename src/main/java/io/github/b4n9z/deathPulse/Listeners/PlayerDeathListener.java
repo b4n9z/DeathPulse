@@ -2,19 +2,13 @@ package io.github.b4n9z.deathPulse.Listeners;
 
 import io.github.b4n9z.deathPulse.DeathPulse;
 import io.github.b4n9z.deathPulse.Managers.HealthManager;
-import org.bukkit.BanEntry;
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.profile.PlayerProfile;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerDeathListener implements Listener {
     private final DeathPulse plugin;
@@ -30,7 +24,7 @@ public class PlayerDeathListener implements Listener {
         UUID playerUUID = player.getUniqueId();
         String deathCause = event.getDamageSource().getDamageType().getTranslationKey();
 
-        if (plugin.getConfigManager().getDeathIgnored().contains(deathCause)) {
+        if (plugin.getConfigManager().getDeathIgnored().contains("all") || plugin.getConfigManager().getDeathIgnored().contains(deathCause)) {
             String msgPlayer = plugin.getConfigManager().getDeathMessagePlayerIgnored()
                     .replace("&","§")
                     .replace("{cause}",deathCause);
@@ -38,11 +32,9 @@ public class PlayerDeathListener implements Listener {
             return;
         }
 
-        if ((plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().getDecreaseCause().contains(deathCause))
-            || (plugin.getConfigManager().isDecreaseEnabled()
-                && plugin.getConfigManager().isDecreaseDayEnabled()
-                && isMultipleDayDecrease(player)
-            )
+        if ((plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().getDecreaseCause().contains("all"))
+                || (plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().getDecreaseCause().contains(deathCause))
+                || (plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().isDecreaseDayEnabled() && isMultipleDayDecrease(player))
         ) {
             int decreaseAmount;
             decreaseAmount = plugin.getConfigManager().getDecreasePerDeath();
@@ -69,7 +61,11 @@ public class PlayerDeathListener implements Listener {
                 newMaxHealth = plugin.getConfigManager().getDecreaseMinAmount();
             } else if(!plugin.getConfigManager().isDecreaseMinEnabled() && newMaxHealth <= 0){
                 newMaxHealth = 2;
-                banPlayer(player);
+                if (plugin.getConfigManager().getDecreaseBanTime() == 0) {
+                    plugin.getBanManager().banPlayerPermanently(player);
+                } else {
+                    plugin.getBanManager().banPlayer(player, (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000);
+                }
                 HealthManager.setMaxHealth(newMaxHealth, player);
                 return;
             }
@@ -93,10 +89,20 @@ public class PlayerDeathListener implements Listener {
         }
 
         double currentMaxHealth = HealthManager.getMaxHealth(player);
-        double newMaxHealth = currentMaxHealth + plugin.getConfigManager().getGainedPerDeath();
+        double newMaxHealth;
+        double gainedAmount;
+        if (plugin.getConfigManager().isGainedSpecialDayEnabled() && isMultipleSpecialIncreaseDay(player.getWorld())) {
+            newMaxHealth = currentMaxHealth + plugin.getConfigManager().getGainedSpecialDayAmount();
+            deathCause = deathCause + "[special_day_" + getCurrentDay(player.getWorld()) + "]";
+            gainedAmount = plugin.getConfigManager().getGainedSpecialDayAmount();
+        } else {
+            newMaxHealth = currentMaxHealth + plugin.getConfigManager().getGainedPerDeath();
+            gainedAmount = plugin.getConfigManager().getGainedPerDeath();
+        }
+
         String msgPlayer = plugin.getConfigManager().getDeathMessagePlayerGained()
                 .replace("&", "§")
-                .replace("{gain}", String.valueOf(plugin.getConfigManager().getGainedPerDeath()))
+                .replace("{gain}", String.valueOf(gainedAmount))
                 .replace("{cause}", deathCause);
         String msgServer = plugin.getConfigManager().getDeathMessageLogServerGained()
                 .replace("&", "§")
@@ -152,20 +158,14 @@ public class PlayerDeathListener implements Listener {
         return false;
     }
 
-    private void banPlayer(Player player) {
-        long durationInMillis = (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000;
-        Date banTime = new Date(System.currentTimeMillis() + durationInMillis);
-        BanList<PlayerProfile> banList = Bukkit.getServer().getBanList(BanList.Type.PROFILE);
-        PlayerProfile playerProfile = player.getPlayerProfile();
-        BanEntry<PlayerProfile> banEntry = banList.getBanEntry(playerProfile);
-
-        if (banEntry == null) {
-            banList.addBan(playerProfile, plugin.getConfigManager().getDeathMessagePlayerBanReason(), banTime, null);
-        } else {
-            banEntry.setExpiration(banTime);
+    private boolean isMultipleSpecialIncreaseDay(World world) {
+        int currentDay = getCurrentDay(world);
+        List<Integer> specialDays = plugin.getConfigManager().getGainedSpecialDays();
+        for (int day : specialDays) {
+            if (currentDay % day == 0) {
+                return true;
+            }
         }
-
-        plugin.getLogger().info(plugin.getConfigManager().getDeathMessageLogServerBanReason());
-        player.kickPlayer(plugin.getConfigManager().getDeathMessagePlayerKicked().replace("&","§"));
+        return false;
     }
 }

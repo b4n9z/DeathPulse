@@ -10,11 +10,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class DeathPulse extends JavaPlugin implements CommandExecutor {
     private DeathDataManager deathDataManager;
     private ConfigManager configManager;
+    private BanManager banManager;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         loadConfigManager();
+        loadBanManager();
         loadDeathDataManager();
         registerEvents();
         registerCommands();
@@ -46,12 +48,23 @@ public class DeathPulse extends JavaPlugin implements CommandExecutor {
         return configManager;
     }
 
+    public BanManager getBanManager() {
+        if (banManager == null) {
+            throw new IllegalStateException("BanManager not initialized");
+        }
+        return banManager;
+    }
+
     public void loadConfigManager() {
         configManager = new ConfigManager(this);
     }
 
     public void loadDeathDataManager() {
         deathDataManager = new DeathDataManager(this);
+    }
+
+    public void loadBanManager() {
+        banManager = new BanManager(this);
     }
 
     private void registerEvents() {

@@ -10,6 +10,10 @@ public class ConfigManager {
     private final Plugin plugin;
     private int hpStart;
     private int gainedPerDeath;
+    private boolean gainedSpecialDayEnabled;
+    private String gainedSpecialDayType;
+    private List<Integer> gainedSpecialDays;
+    private int gainedSpecialDayAmount;
     private boolean gainedMaxEnabled;
     private int gainedMaxAmount;
     private boolean decreaseEnabled;
@@ -44,6 +48,10 @@ public class ConfigManager {
         try {
             this.hpStart = plugin.getConfig().getInt("HP.start", 20);
             this.gainedPerDeath = plugin.getConfig().getInt("HP.gained.per_death", 2);
+            this.gainedSpecialDayEnabled = plugin.getConfig().getBoolean("HP.gained.special_day.enabled", false);
+            this.gainedSpecialDayType = plugin.getConfig().getString("HP.gained.special_day.type", "minecraft");
+            this.gainedSpecialDays = plugin.getConfig().getIntegerList("HP.gained.special_day.days");
+            this.gainedSpecialDayAmount = plugin.getConfig().getInt("HP.gained.special_day.amount", 10);
             this.gainedMaxEnabled = plugin.getConfig().getBoolean("HP.gained.max.enabled", false);
             this.gainedMaxAmount = plugin.getConfig().getInt("HP.gained.max.amount", 114);
             this.decreaseEnabled = plugin.getConfig().getBoolean("HP.decrease.enabled", false);
@@ -71,24 +79,34 @@ public class ConfigManager {
 
             validateConfig();
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to load config: " + e.getMessage());
+            plugin.getLogger().warning("§cFailed to load config:§a " + e.getMessage());
         }
     }
 
     private void validateConfig() throws Exception {
-        if (hpStart < 0) throw new Exception("Invalid HP.start value: " + hpStart);
-        if (gainedPerDeath < 0) throw new Exception("Invalid HP.gained.per_death value: " + gainedPerDeath);
-        if (gainedMaxEnabled && gainedMaxAmount < hpStart) throw new Exception("Invalid HP.gained.max.amount value: " + gainedMaxAmount);
-        if (decreaseEnabled && decreasePerDeath < 0) throw new Exception("Invalid HP.decrease.per_death value: " + decreasePerDeath);
-        if (decreaseMinAmount < 0) throw new Exception("Invalid HP.decrease.min.amount value: " + decreaseMinAmount);
-        if (decreaseBanTime < 0) throw new Exception("Invalid HP.decrease.min.banTime value: " + decreaseBanTime);
-        if (decreaseDayAmount < 0) throw new Exception("Invalid HP.decrease.day.amount value: " + decreaseDayAmount);
-        if (!decreaseDayType.equals("real") && !decreaseDayType.equals("minecraft")) throw new Exception("Invalid HP.decrease.day.type value: " + decreaseDayType);
+        if (hpStart <= 0) throw new Exception("Invalid HP.start value:§e " + hpStart);
+        if (gainedPerDeath <= 0) throw new Exception("Invalid HP.gained.per_death value:§e " + gainedPerDeath);
+        if (gainedSpecialDayEnabled && gainedSpecialDays.isEmpty()) throw new Exception("Invalid HP.gained.special_day.type value:§e " + gainedSpecialDayType);
+        if (gainedSpecialDayEnabled && gainedSpecialDayAmount < decreasePerDeath) throw new Exception("Invalid HP.gained.special_day.amount value:§e " + gainedSpecialDayAmount);
+        if (!gainedSpecialDayType.equals("real") && !gainedSpecialDayType.equals("minecraft")) throw new Exception("Invalid HP.gained.special_day.type value:§e " + gainedSpecialDayType);
+        if (gainedMaxEnabled && gainedMaxAmount <= 0) throw new Exception("Invalid HP.gained.max.amount value:§e " + gainedMaxAmount);
+        if (decreaseEnabled && decreasePerDeath < 0) throw new Exception("Invalid HP.decrease.per_death value:§e " + decreasePerDeath);
+        if (decreaseEnabled && decreaseMinEnabled && decreaseMinAmount < 0) throw new Exception("Invalid HP.decrease.min.amount value:§e " + decreaseMinAmount);
+        if (decreaseEnabled && !decreaseMinEnabled && decreaseBanTime < 0) throw new Exception("Invalid HP.decrease.min.banTime value:§e " + decreaseBanTime);
+        if (decreaseEnabled && decreaseDayEnabled && decreaseDays.isEmpty()) throw new Exception("Invalid HP.decrease.day.days value:§e " + decreaseDays);
+        if (decreaseEnabled && decreaseDayEnabled && decreaseDayAmount < 0) throw new Exception("Invalid HP.decrease.day.amount value:§e " + decreaseDayAmount);
+        if (!decreaseDayType.equals("real") && !decreaseDayType.equals("minecraft")) throw new Exception("Invalid HP.decrease.day.type value:§e " + decreaseDayType);
 
         Set<String> intersection = new HashSet<>(deathIgnored);
         intersection.retainAll(decreaseCause);
         if (!intersection.isEmpty()) {
-            throw new Exception("death.ignored and death.decrease lists should not have common elements: " + String.join(", ", intersection));
+            throw new Exception("death.ignored and death.decrease lists should not have common elements:§e " + String.join(", ", intersection));
+        }
+
+        Set<Integer> SpecialDays = new HashSet<>(gainedSpecialDays);
+        SpecialDays.retainAll(decreaseDays);
+        if (!SpecialDays.isEmpty()) {
+            throw new Exception("gained.special_day.days and decrease.day.days lists should not have common elements:§e " + String.join(", ", SpecialDays.stream().map(String::valueOf).toArray(String[]::new)));
         }
     }
 
@@ -108,6 +126,22 @@ public class ConfigManager {
     public void setGainedPerDeath(int gainedPerDeath) {
         plugin.getConfig().set("HP.gained.per_death", gainedPerDeath);
         this.gainedPerDeath = gainedPerDeath;
+    }
+
+    public boolean isGainedSpecialDayEnabled() {
+        return gainedSpecialDayEnabled;
+    }
+
+    public String getGainedSpecialDayType() {
+        return gainedSpecialDayType;
+    }
+
+    public List<Integer> getGainedSpecialDays() {
+        return gainedSpecialDays;
+    }
+
+    public int getGainedSpecialDayAmount() {
+        return gainedSpecialDayAmount;
     }
 
     public boolean isGainedMaxEnabled() {

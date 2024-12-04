@@ -118,33 +118,42 @@ The configuration file (`config.yml`) allows you to customize various aspects of
 ```yaml
 # config.yml
 HP:
-  start: 20 #Sart HP player
+  start: 20 # Starting HP for players
   gained:
-    per_death: 2 #HP Gained per player death
+    per_death: 2 # HP Gained per player death
+    special_day: # Special Gained day settings(boost gained per death)
+      enabled: false # true or false, when true, special day is active
+      type: "minecraft" # "real" for real-world days, "minecraft" for server uptime days
+      days: [ 5, 7 ] # List of days (as multiples) when special day is active
+      amount: 10 # HP Gained per death on special day, cannot same as per_death
     max:
-      enabled: false #Max HP player, true or false, when true, player has max HP limit
-      amount: 114 #Max HP player limit
+      enabled: false # Enable max HP limit (true or false), when true, player has max HP limit
+      amount: 114 # Max HP limit for players
   decrease: #decrease HP player when death with certain type
-    enabled: false #true or false, when true, player can decrease their HP
-    per_death: 2 #HP decrease per player death
-    day: #Decrease day settings
-      enabled: false #true or false, when true, decrease day is active
-      type: "minecraft" # "real" for real-world days, "server" for server uptime days
-      days: [ 5, 7 ] #List of days (as multiples) when decrease day is active
-      amount: 10 #HP decrease per death on decrease day
-    min: #HP minimum player when always death with decrease type
-      enabled: false #true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
-      amount: 2 #Min HP player limit
-      banTime: 24 #Ban time in real life hours
+    enabled: false # true or false, when true, player can decrease their HP
+    per_death: 2 # HP decrease per player death
+    day: # Decrease day settings
+      enabled: false # true or false, when true, decrease day is active
+      type: "minecraft" # "real" for real-world days, "minecraft" for server uptime days
+      days: [ 5, 7 ] # List of days (as multiples) when decrease day is active
+      amount: 10 # HP decrease per death on decrease day
+    min: # HP minimum player when always death with decrease type
+      enabled: false # true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
+      amount: 2 # Min HP player limit
+      banTime: 24 # Ban time in real life hours, set to 0 to ban permanently
 
 death:
-  must_difference: true #true or false, when true, player must die with different way to gained HP
-  ignored: #Ignored death type cause player not gain HP
+  must_difference: true # true or false, when true, player must die with different way to gained HP
+  ignored: # Ignored death type cause player not gain HP
+  #  - all # Ignore all death
   #  - lava
   #  - fall
-  decrease: #decrease HP player when death with certain type
+  #  - etc
+  decrease: # decrease HP player when death with certain type
+  #  - all # Decrease all death
   #  - lava
   #  - fall
+  #  - etc
 
 notifications:
   death_message:
@@ -163,7 +172,9 @@ notifications:
 ```
 ## Features
 - **Health Gain**: Players gain health upon death.
+- **Special Day Boosts**: Configure specific days where players receive extra health upon death.
 - **Health Decrease**: Players can lose health upon death if configured.
+- **Global Death Ignoring and Decreasing**: Use `all` to ignore or decrease health for all death types.
 - **Customizable Messages**: Tailor the messages players receive upon death.
 - **Ignored Death Causes**: Specify certain death causes to ignore.
 - **First Join Health**: Set the health players start with on their first join.
