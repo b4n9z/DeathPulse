@@ -19,7 +19,7 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
 
         if (!player.hasPlayedBefore()) {
-            HealthManager.setMaxHealth(plugin.getConfigManager().getHpStart(), player);
+            HealthManager.setMaxHealth(plugin.getConfigManager().getHPStart(), player);
             HealthManager.healPlayer(player);
         }
     }

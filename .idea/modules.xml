@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/DeathPulse.main.iml" filepath="$PROJECT_DIR$/.idea/modules/DeathPulse.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/io.github.b4n9z.DeathPulse.main.iml" filepath="$PROJECT_DIR$/.idea/modules/io.github.b4n9z.DeathPulse.main.iml" />
     </modules>
   </component>
 </project>

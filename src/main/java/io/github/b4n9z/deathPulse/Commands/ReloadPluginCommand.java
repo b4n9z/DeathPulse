@@ -16,7 +16,7 @@ public class ReloadPluginCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (player.isOp() || player.hasPermission("dp.reload")) {
+            if (player.isOp() || player.hasPermission("dp.reload") || plugin.getConfigManager().isPermissionAllPlayerReload()) {
                 plugin.reloadConfig();
                 plugin.loadConfigManager();
                 player.sendMessage("§fPlugin reloaded§a successfully.");

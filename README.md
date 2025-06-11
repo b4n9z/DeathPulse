@@ -43,7 +43,7 @@ DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying playe
     - **Permission**: `dp.reload`
 
 - **setHealth**:
-    - **Usage**: `/dp setHealth <player> <amount>`
+    - **Usage**: `/dp setMaxHealth <player> <amount>`
     - **Description**: Sets the health of a specified player.
     - **Permission**: `dp.setHealth`
 
@@ -67,31 +67,6 @@ DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying playe
     - **Description**: Removes the death data of a specified player or all players.
     - **Permission**: `dp.removeDeathData`
 
-- **setStartHealth**:
-    - **Usage**: `/dp setStartHealth <amount>`
-    - **Description**: Sets the starting health for players in config.
-    - **Permission**: `dp.setStartHealth`
-
-- **setGainedPerDeath**:
-    - **Usage**: `/dp setGainedPerDeath <amount>`
-    - **Description**: Sets the health gained per death.
-    - **Permission**: `dp.setGainedPerDeath`
-
-- **setGainedMax**:
-    - **Usage**: `/dp setGainedMax <true/false> <amount>`
-    - **Description**: Sets the maximum health gain per death.
-    - **Permission**: `dp.setGainedMax`
-
-- **setDecrease**:
-    - **Usage**: `/dp setDecrease <true/false> <perDeathAmount> <minHealthAmount>`
-    - **Description**: Sets the health decrease per death.
-    - **Permission**: `dp.setDecrease`
-
-- **setDecreaseMin**:
-    - **Usage**: `/dp setDecreaseMin <true/false> <minHealthAmount/banTime>`
-    - **Description**: Sets the minimum health decrease or ban time. When set to true, it configures minimum health amount; when set to false, it configures ban time in hours.
-    - **Permission**: `dp.setDecreaseMin`
-
 - **help**:
     - **Usage**: `/dp help`
     - **Description**: Shows this help message.
@@ -100,16 +75,11 @@ DeathPulse is a Minecraft plugin designed to enhance gameplay by modifying playe
 ## Permissions
 - `dp.admin`: Access to all [DeathPulse](cci:2://file:///D:/b4n9z/Minecraft/Server/PluginBuild/DeathPulse/src/main/java/io/github/b4n9z/deathPulse/DeathPulse.java:8:0-57:1) commands.
 - `dp.reload`: Permission to reload the plugin configuration.
-- `dp.setHealth`: Permission to set player health.
+- `dp.setMaxHealth`: Permission to set player health.
 - `dp.viewHealth`: Permission to view player health.
 - `dp.resetHealth`: Permission to reset player health.
 - `dp.matchHealth`: Permission to match player health.
 - `dp.removeDeathData`: Permission to remove player death data.
-- `dp.setStartHealth`: Permission to set starting health.
-- `dp.setGainedPerDeath`: Permission to set health gained per death.
-- `dp.setGainedMax`: Permission to set maximum gained health.
-- `dp.setDecrease`: Permission to set health decrease.
-- `dp.setDecreaseMin`: Permission to set minimum health decrease or ban time.
 - `dp.help`: Permission to view the help message.
 
 ## Configuration
@@ -117,72 +87,108 @@ The configuration file (`config.yml`) allows you to customize various aspects of
 
 ```yaml
 # config.yml
-HP:
-  start: 20 # Starting HP for players
-  gained:
-    per_death: 2 # HP Gained per player death
-    special_day: # Special Gained day settings(boost gained per death)
-      enabled: false # true or false, when true, special day is active
-      type: "minecraft" # "real" for real-world days, "minecraft" for server uptime days
-      days: [ 5, 7 ] # List of days (as multiples) when special day is active
-      amount: 10 # HP Gained per death on special day, cannot same as per_death
-    max:
-      enabled: false # Enable max HP limit (true or false), when true, player has max HP limit
-      amount: 114 # Max HP limit for players
-  decrease: #decrease HP player when death with certain type
-    enabled: false # true or false, when true, player can decrease their HP
-    per_death: 2 # HP decrease per player death
-    day: # Decrease day settings
-      enabled: false # true or false, when true, decrease day is active
-      type: "minecraft" # "real" for real-world days, "minecraft" for server uptime days
-      days: [ 5, 7 ] # List of days (as multiples) when decrease day is active
-      amount: 10 # HP decrease per death on decrease day
-    min: # HP minimum player when always death with decrease type
-      enabled: false # true or false, when true, player has min HP limit, when false, player with 0 HP getting ban
-      amount: 2 # Min HP player limit
-      banTime: 24 # Ban time in real life hours, set to 0 to ban permanently
+firstTimeSetup: 0 # First day Plugin setup in this server, don't change this section if you don't know what you are doing
 
-death:
-  must_difference: true # true or false, when true, player must die with different way to gained HP
-  ignored: # Ignored death type cause player not gain HP
-  #  - all # Ignore all death
-  #  - lava
-  #  - fall
-  #  - etc
-  decrease: # decrease HP player when death with certain type
-  #  - all # Decrease all death
-  #  - lava
-  #  - fall
-  #  - etc
+HP: # HP settings
+  Start: 20 # Starting HP for players
+  MaxHP: # Max HP player
+    enabled: false # Enable max HP limit (true/false), when true, player has max HP limit
+    amount: 140 # Amount of Max HP limit for players
+  MinHP: # Min HP player
+    enabled: false # (true/false) when true, player has min HP limit, when false, player with 0 HP getting ban
+    amount: 2 # Amount of Min HP player limit
+    banTime: 24 # Ban time in real life hours, set to 0 to ban permanently
+
+ignore: # Ignore death
+  enabled: false # (true/false) when true, player can ignore their death
+  day: # Increase day settings
+    enabled: false # true or false, when true, ignored day is active
+    same_cause_required: false # (true/false) when true, player get ignore day just when they had died with ignored cause
+    #when false, player death always ignored even not same with ignored cause in ignored day
+    type: "minecraft" # "real" for real-world days, "minecraft" for minecraft days
+    days: [ 19, 23, 29 ] # List of days (as multiples) when ignored day is active
+  must_difference: false # (true/false) when true, player who had died with ignore cause before, cannot used ignore with same cause again
+  # when false, player always ignore HP with ignore cause, even repeat death with same cause type, did not record their death data
+  cause: # Ignored death type, most priority than decrease cause or increase cause
+  # - all # Ignore all death type
+  # - lava
+  # - fall
+  # - etc
+
+increase: # Increase HP player when they die
+  enabled: true # true or false, when true, player can increase their HP
+  per_death: 2 # HP Increase per player death
+  day: # Increase day settings
+    enabled: false # true or false, when true, increase day is active
+    same_cause_required: false # (true/false) when true, player get increase day just when they had died with increase cause
+    #when false, player always increase HP even not same with increase cause in increase day
+    type: "minecraft" # "real" for real-world days, "minecraft" for minecraft days
+    days: [ 11, 13, 17 ] # List of days (as multiples) when increase day is active
+    amount: 10 # HP Increase per death on increase day
+  must_difference: true # (true/false) when true, player who had died with increase cause before, cannot used increase with same cause again
+  # when false, player always increase HP with increase cause, even repeat death with same cause type, did not record their death data
+  cause: # Increase death type, most priority than decrease cause but lower than ignore cause
+    - all # Increase all death type
+    # - lava
+    # - fall
+    # - etc
+
+decrease: #decrease HP player when death with certain type
+  enabled: false # true or false, when true, player can decrease their HP
+  per_death: 2 # HP decrease per player death
+  day: # Decrease day settings
+    enabled: false # true or false, when true, decrease day is active
+    same_cause_required: false # (true/false) when true, player get decrease day just when they had died with decrease cause
+    #when false, player always decrease HP even not same with decrease cause in decrease day
+    type: "minecraft" # "real" for real-world days, "minecraft" for minecraft days
+    days: [ 5, 7 ] # List of days (as multiples) when decrease day is active
+    amount: 10 # HP decrease per death on decrease day
+  must_difference: false # (true/false) when true, player who had died with decrease cause before, cannot decrease with same cause again
+  # when false, player always decrease HP with decrease cause, even repeat death with same cause type, did not record their death data
+  cause: # Decrease death type, lowest priority than ignore cause and increase cause
+  # - all # Decrease all death type
+  # - lava
+  # - fall
+  # - etc
+
+# cause ignored type always priority higher, after that death with increase cause, then decrease cause
 
 notifications:
-  death_message:
-    player:
-      gained: "&fYou gained &9{gain}&f health cause : &c{cause}"
-      ifSameWay: "&cYou don't gained health with death same way"
-      ignored: "&fDied with &c{cause}&f not gained HP"
-      decrease: "&fYou decrease &c{decrease}&f health cause : &c{cause}"
-      maxHealth: "&fYou have reached the&c maximum health limit&f."
-      banReason: "You have been banned due to low health" #Ban reason cannot have color
-      kicked: "&fYou have been&c kicked&f due to low health"
-    logServer:
-      gained: "{name} gained {gain} health by {cause}"
-      decrease: "{name} decrease {decrease} health cause : {cause}"
-      banReason: "{name} has been banned due to low health"
+  defaultDeathMessage: false # true or false, when false, another player won't receive default death message
+  player:
+    maxHealth: "&bYou&f have reached the&c maximum health limit&f."
+    minHealth: "&bYou&f have reached the&c minimum health limit&f."
+    banReason: "&bYou&f have been&c banned&f due to low health"
+    kicked: "&bYou&f have been&c kicked&f due to low health"
+
+    ignored: "&fDied with &c{cause}&f now&c not increased&f HP"
+    ignoredSameWay: "&fWe&c can't&f ignoring you again cause&c you died&f with&c same way"
+
+    increased: "&bYou&a increased &d{increase}&f health cause: &c{cause}"
+    increaseSameWay: "&bYou&c don't increased health&f with death same way"
+
+    decreased: "&bYou&c decrease &d{decrease}&f health cause: &c{cause}"
+
+  logServer:
+    maxHealth: "&b{name}&f have reached the&c maximum health limit&f."
+    minHealth: "&b{name}&f have reached the&c minimum health limit&f."
+
+    increased: "&b{name}&a increase&d {increase}&f health by&b {cause}"
+    decreased: "&b{name}&c decrease&d {decrease}&f health cause:&c {cause}"
+    banReason: "&b{name}&f has been&c banned&f due to low health"
 ```
 ## Features
-- **Health Gain**: Players gain health upon death.
-- **Special Day Boosts**: Configure specific days where players receive extra health upon death.
+- **Health Increase**: Players increase health upon death.
 - **Health Decrease**: Players can lose health upon death if configured.
-- **Global Death Ignoring and Decreasing**: Use `all` to ignore or decrease health for all death types.
+- **Ignored, Increase, and Decrease Death Causes**: Specify certain death causes to ignore, increase, or decrease health.
+- **Global Death Ignoring, Increasing, and Decreasing**: Use `all` to ignore, increase, or decrease health for all death types.
+- **Day Ignored, Increase, and Decrease**: Allows configuration of specific days when death ignore, increase, and decrease is active, regardless of the cause of death with some settings. To activate this feature, you must enable the main `ignore`, `increase`, or `decrease` setting and day setting. If you only want to decrease health on specified days without affecting player health on other days, set `per_death` in the `increase` or `decrease` settings to 0.
 - **Customizable Messages**: Tailor the messages players receive upon death.
-- **Ignored Death Causes**: Specify certain death causes to ignore.
 - **First Join Health**: Set the health players start with on their first join.
 - **Maximum Health Limit**: Set a maximum health limit that players can reach.
 - **Minimum Health Limit/Ban**: Set a minimum health limit, or ban players when their health drops to zero.
-- **Day Decrease**: Allows configuration of specific days when health decrease is active, regardless of the cause of death. To activate this feature, you must enable the main `decrease` setting and day setting. If you only want to decrease health on specified days without affecting player health on other days, set `per_death` in the `decrease` settings to 0.
-- **Health Matching**: Match the health of a specified player or all players based on their death data.
-- **Death Data Management**: Remove death data of a specified player or all players.
+- **Health Matching**: Match the health of a specified player or all players based on their death data with commands.
+- **Death Data Management**: Remove death data of a specified player or all players with commands.
 - **Configuration Reload**: Reload the plugin configuration without restarting the server.
 
 ## Event Listeners

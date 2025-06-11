@@ -12,17 +12,17 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class SetHealthCommand implements CommandExecutor {
+public class SetMaxHealthCommand implements CommandExecutor {
     private final DeathPulse plugin;
 
-    public SetHealthCommand(DeathPulse plugin) {
+    public SetMaxHealthCommand(DeathPulse plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.setHealth"))) {
+            if (!(player.isOp()) || !(player.hasPermission("dp.setMaxHealth")) || !plugin.getConfigManager().isPermissionAllPlayerSetMaxHealth()) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -32,7 +32,7 @@ public class SetHealthCommand implements CommandExecutor {
         }
 
         if (args.length != 3) {
-            sender.sendMessage("§fUsage:§c /DeathPulse§b setHealth§f <player> <amount>");
+            sender.sendMessage("§fUsage:§c /DeathPulse§b setMaxHealth§f <player> <amount>");
             return true;
         }
 
@@ -46,11 +46,11 @@ public class SetHealthCommand implements CommandExecutor {
             return true;
         }
 
-        if (newHealth > plugin.getConfigManager().getGainedMaxAmount()) {
-            sender.sendMessage("§fHealth amount§c exceeds§f the max limit (§c" + plugin.getConfigManager().getGainedMaxAmount() + "§f).");
+        if (plugin.getConfigManager().isMaxHPEnabled() && newHealth > plugin.getConfigManager().getMaxHPAmount()) {
+            sender.sendMessage("§fHealth amount§c exceeds§f the max limit (§c" + plugin.getConfigManager().getMaxHPAmount() + "§f).");
             return true;
-        } else if (newHealth < plugin.getConfigManager().getDecreaseMinAmount()) {
-            sender.sendMessage("§fHealth amount is§c under§f the min limit (§c" +  plugin.getConfigManager().getDecreaseMinAmount() + "§f).");
+        } else if (plugin.getConfigManager().isMinHPEnabled() && newHealth < plugin.getConfigManager().getMinHPAmount()) {
+            sender.sendMessage("§fHealth amount is§c under§f the min limit (§c" +  plugin.getConfigManager().getMinHPAmount() + "§f).");
             return true;
         }
 

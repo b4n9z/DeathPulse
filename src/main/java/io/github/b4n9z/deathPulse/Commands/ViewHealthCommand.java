@@ -23,7 +23,7 @@ public class ViewHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.viewHealth"))) {
+            if (!(player.isOp()) || !(player.hasPermission("dp.viewHealth")) || !plugin.getConfigManager().isPermissionAllPlayerViewHealth()) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

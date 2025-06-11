@@ -21,7 +21,7 @@ public class ResetHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.resetHealth"))){
+            if (!(player.isOp()) || !(player.hasPermission("dp.resetHealth")) || !plugin.getConfigManager().isPermissionAllPlayerResetHealth()){
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -37,7 +37,7 @@ public class ResetHealthCommand implements CommandExecutor {
 
         int startHealth;
         try {
-            startHealth = plugin.getConfigManager().getHpStart();
+            startHealth = plugin.getConfigManager().getHPStart();
         } catch (NumberFormatException e) {
             sender.sendMessage("§cInvalid health amount.");
             return true;

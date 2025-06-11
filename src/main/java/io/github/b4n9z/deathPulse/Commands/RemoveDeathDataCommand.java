@@ -23,7 +23,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) || !(player.hasPermission("dp.removeDeathData"))) {
+            if (!(player.isOp()) || !(player.hasPermission("dp.removeDeathData")) || !plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

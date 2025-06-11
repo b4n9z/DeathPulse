@@ -25,7 +25,7 @@ public class MatchHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.matchHealth"))){
+            if (!(player.isOp()) || !(player.hasPermission("dp.matchHealth")) || !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -71,21 +71,21 @@ public class MatchHealthCommand implements CommandExecutor {
         UUID playerUUID = player.getUniqueId();
         Set<String> deathData = plugin.getDeathDataManager().loadPlayerDeaths(playerUUID);
         if (deathData.isEmpty()) {
-            HealthManager.setMaxHealth(plugin.getConfigManager().getHpStart(), player);
+            HealthManager.setMaxHealth(plugin.getConfigManager().getHPStart(), player);
             sender.sendMessage("§b" + player.getName() + "§c has no recorded§e death data.");
         } else {
             int matchedHealth = calculateHealthFromDeathData(deathData);
             if (matchedHealth <= 0) {
-                if (plugin.getConfigManager().getDecreaseBanTime() == 0) {
+                if (plugin.getConfigManager().getMinHPBanTime() == 0) {
                     plugin.getBanManager().banPlayerPermanently(player);
                 } else {
-                    plugin.getBanManager().banPlayer(player, (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000);
+                    plugin.getBanManager().banPlayer(player, (long) plugin.getConfigManager().getMinHPBanTime() * 60 * 60 * 1000);
                 }
                 sender.sendMessage("§fBanned§b " + player.getName() + "§f because their health is§c 0§f or less.");
             } else {
                 HealthManager.setMaxHealth(matchedHealth, player);
                 player.sendMessage("§bYour§f health has been matched to§d " + matchedHealth + "§f based on your§e death data.");
-                sender.sendMessage("§fSet§b " + player.getName() + "'s§f health to§d " + matchedHealth + "§f based on their§e death data.");
+                sender.sendMessage("§fSet§b " + player.getName() + "§f health to§d " + matchedHealth + "§f based on their§e death data.");
             }
         }
     }
@@ -95,66 +95,110 @@ public class MatchHealthCommand implements CommandExecutor {
         UUID playerUUID = player.getUniqueId();
         Set<String> deathData = plugin.getDeathDataManager().loadPlayerDeaths(playerUUID);
         if (deathData.isEmpty()) {
-            HealthManager.setOfflinePlayerMaxHealth(plugin.getConfigManager().getHpStart(), player);
+            HealthManager.setOfflinePlayerMaxHealth(plugin.getConfigManager().getHPStart(), player);
             sender.sendMessage("§b" + player.getName() + "§c has no recorded§e death data.");
         } else {
             int matchedHealth = calculateHealthFromDeathData(deathData);
             if (matchedHealth <= 0) {
-                if (plugin.getConfigManager().getDecreaseBanTime() == 0) {
+                if (plugin.getConfigManager().getMinHPBanTime() == 0) {
                     plugin.getBanManager().banOfflinePlayerPermanently(player);
                 } else {
-                    plugin.getBanManager().banOfflinePlayer(player, (long) plugin.getConfigManager().getDecreaseBanTime() * 60 * 60 * 1000);
+                    plugin.getBanManager().banOfflinePlayer(player, (long) plugin.getConfigManager().getMinHPBanTime() * 60 * 60 * 1000);
                 }
                 sender.sendMessage("§fBanned§b " + player.getName() + "§f because their health is§c 0§f or less, and they are§c offline§f.");
             } else {
                 HealthManager.setOfflinePlayerMaxHealth(matchedHealth, player);
-                sender.sendMessage("§fSet§b " + player.getName() + "'s§f health to§b " + matchedHealth + "§f based on their§e death data.");
+                sender.sendMessage("§fSet§b " + player.getName() + "§f health to§b " + matchedHealth + "§f based on their§e death data.");
             }
         }
     }
 
-    private int calculateHealthFromDeathData(Set<String> deathData) {
-        int startHealth = plugin.getConfigManager().getHpStart();
-        int gainedPerDeath = plugin.getConfigManager().getGainedPerDeath();
-        List<Integer> gainedSpecialDays = plugin.getConfigManager().getGainedSpecialDays();
-        int gainedSpecialDayAmount = plugin.getConfigManager().getGainedSpecialDayAmount();
-        int decreasePerDeath = plugin.getConfigManager().getDecreasePerDeath();
-        Set<String> ignoredDeaths = new HashSet<>(plugin.getConfigManager().getDeathIgnored());
-        Set<String> decreaseCauses = new HashSet<>(plugin.getConfigManager().getDecreaseCause());
-        List<Integer> decreaseDays = plugin.getConfigManager().getDecreaseDays();
-        int decreaseDayAmount = plugin.getConfigManager().getDecreaseDayAmount();
-        boolean ignoreAll = ignoredDeaths.contains("all");
-        boolean decreaseAll = decreaseCauses.contains("all");
+    private boolean isValidDay(String deathCause, int day, String typeDeath) {
+        String keyword = typeDeath+"Day_";
+        int startIndex = deathCause.indexOf(keyword);
+        if (startIndex == -1) {
+            return false; // If "increaseDay_" or " "decreaseDay_" not found, return false
+        }
+        startIndex += keyword.length(); // Position after "increaseDay_" or "decreaseDay_"
 
-        long validDeathsCount = deathData.stream()
-                .filter(deathCause -> !ignoreAll && !decreaseAll && !ignoredDeaths.contains(deathCause) && !decreaseCauses.contains(deathCause) &&
-                        decreaseDays.stream().noneMatch(day -> deathCause.contains("decrease_day_" + day)) &&
-                        gainedSpecialDays.stream().noneMatch(day -> deathCause.matches(".*\\[special_day_" + day + "]")))
-                .count();
-
-        long validDeathDaysCount = deathData.stream()
-                .filter(deathCause -> !ignoreAll && !decreaseAll && !ignoredDeaths.contains(deathCause) && !decreaseCauses.contains(deathCause) &&
-                        decreaseDays.stream().noneMatch(day -> deathCause.contains("decrease_day_" + day)) &&
-                        gainedSpecialDays.stream().anyMatch(day -> deathCause.matches(".*\\[special_day_" + day + "]")))
-                .count();
-
-        long decreaseDeathsCount = deathData.stream()
-                .filter(deathCause -> decreaseAll || decreaseCauses.contains(deathCause))
-                .count();
-
-        long decreaseDaysCount = deathData.stream()
-                .filter(deathCause -> decreaseDays.stream()
-                        .anyMatch(day -> deathCause.contains("decrease_day_" + day)))
-                .count();
-
-        int totalHealth = startHealth + (int) (validDeathsCount * gainedPerDeath) + (int) (validDeathDaysCount * gainedSpecialDayAmount) - (int) (decreaseDeathsCount * decreasePerDeath) - (int) (decreaseDaysCount * decreaseDayAmount);
-
-        if (plugin.getConfigManager().isGainedMaxEnabled()){
-            totalHealth = Math.min(totalHealth, plugin.getConfigManager().getGainedMaxAmount());
+        int endIndex = deathCause.indexOf('_', startIndex); // Position of the next underscore
+        if (endIndex == -1) {
+            endIndex = deathCause.indexOf(']', startIndex); // If no next underscore, use position of the closing bracket
         }
 
-        if (plugin.getConfigManager().isDecreaseMinEnabled()){
-            totalHealth = Math.max(totalHealth, plugin.getConfigManager().getDecreaseMinAmount());
+        try {
+            int deathDay = Integer.parseInt(deathCause.substring(startIndex, endIndex));
+            return deathDay % day == 0;
+        } catch (NumberFormatException e) {
+            return false; // If parsing fails, return false
+        }
+    }
+
+    private boolean isCauseMatch(Set<String> causes, String deathCause, String suffix, String typeDeath) {
+        if (!deathCause.endsWith(suffix) && !typeDeath.equals("DAY")) {
+            return false;
+        }
+        if (causes.contains("all")) {
+            return true;
+        }
+        return causes.stream().anyMatch(cause -> {
+            int bracketIndex = deathCause.indexOf('[');
+            String deathCauseWithoutSuffix = bracketIndex != -1 ? deathCause.substring(0, bracketIndex) : deathCause;
+            return deathCauseWithoutSuffix.equals(cause);
+        });
+    }
+
+    private int calculateHealthFromDeathData(Set<String> deathData) {
+        int startHealth = plugin.getConfigManager().getHPStart();
+        boolean isMaxHPEnabled = plugin.getConfigManager().isMaxHPEnabled();
+        int MaxHPAmount = plugin.getConfigManager().getMaxHPAmount();
+        boolean isMinHPEnabled = plugin.getConfigManager().isMinHPEnabled();
+        int MinHPAmount = plugin.getConfigManager().getMinHPAmount();
+
+        boolean isIncreaseEnabled = plugin.getConfigManager().isIncreaseEnabled();
+        int increasePerDeath = plugin.getConfigManager().getIncreasePerDeath();
+        boolean isIncreaseDayEnabled = plugin.getConfigManager().isIncreaseDayEnabled();
+        boolean isIncreaseDaySameCauseRequired = plugin.getConfigManager().isIncreaseDaySameCauseRequired();
+        List<Integer> increaseDays = plugin.getConfigManager().getIncreaseDays();
+        int increaseDayAmount = plugin.getConfigManager().getIncreaseDayAmount();
+        Set<String> increaseCause = new HashSet<>(plugin.getConfigManager().getIncreaseCause());
+
+        boolean isDecreaseEnabled = plugin.getConfigManager().isDecreaseEnabled();
+        int decreasePerDeath = plugin.getConfigManager().getDecreasePerDeath();
+        boolean isDecreaseDayEnabled = plugin.getConfigManager().isDecreaseDayEnabled();
+        boolean isDecreaseDaySameCauseRequired = plugin.getConfigManager().isDecreaseDaySameCauseRequired();
+        List<Integer> decreaseDays = plugin.getConfigManager().getDecreaseDays();
+        int decreaseDayAmount = plugin.getConfigManager().getDecreaseDayAmount();
+        Set<String> decreaseCause = new HashSet<>(plugin.getConfigManager().getDecreaseCause());
+
+        long validIncreaseCount = deathData.stream()
+                .filter(deathCause -> (isIncreaseEnabled && (isCauseMatch(increaseCause, deathCause, "[Increase]",""))))
+                .count();
+        long validIncreaseDaysCount = deathData.stream()
+                .filter(deathCause -> (isIncreaseEnabled && isIncreaseDayEnabled && (
+                        (!isIncreaseDaySameCauseRequired && deathCause.startsWith("increaseDay") && increaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "increase")))
+                        || (isIncreaseDaySameCauseRequired && (isCauseMatch(increaseCause, deathCause, "[Increase]","DAY")) && (increaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "increase"))))
+                )))
+                .count();
+
+        long validDecreaseCount = deathData.stream()
+                .filter(deathCause -> (isDecreaseEnabled && (isCauseMatch(decreaseCause, deathCause, "[Decrease]",""))))
+                .count();
+        long validDecreaseDaysCount = deathData.stream()
+                .filter(deathCause -> (isDecreaseEnabled && isDecreaseDayEnabled && (
+                        (!isDecreaseDaySameCauseRequired && deathCause.startsWith("decreaseDay") && decreaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "decrease")))
+                        || (isDecreaseDaySameCauseRequired && (isCauseMatch(decreaseCause, deathCause, "[Decrease]","DAY")) && (decreaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "decrease"))))
+                )))
+                .count();
+
+        int totalHealth = (int) (startHealth + (validIncreaseCount * increasePerDeath) + (validIncreaseDaysCount * increaseDayAmount) - (validDecreaseCount * decreasePerDeath) - (validDecreaseDaysCount * decreaseDayAmount));
+
+        if (isMaxHPEnabled){
+            totalHealth = Math.min(totalHealth, MaxHPAmount);
+        }
+
+        if (isMinHPEnabled){
+            totalHealth = Math.max(totalHealth, MinHPAmount);
         }
 
         return totalHealth;
