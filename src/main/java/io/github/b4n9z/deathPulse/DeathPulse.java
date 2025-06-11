@@ -14,7 +14,9 @@ import java.util.Objects;
 
 public class DeathPulse extends JavaPlugin implements CommandExecutor {
     private DeathDataManager deathDataManager;
+    private DebtDataManager debtDataManager;
     private ConfigManager configManager;
+    private HealthItemManager healthItemManager;
     private BanManager banManager;
     private DayManager dayManager;
 
@@ -22,10 +24,12 @@ public class DeathPulse extends JavaPlugin implements CommandExecutor {
     public void onEnable() {
         saveDefaultConfig();
         loadConfigManager();
+        loadHealthItemManager();
         loadBanManager();
         loadDayManager();
         dayManager.start();
         loadDeathDataManager();
+        loadDebtDataManager();
         registerEvents();
         registerCommands();
         loadMetrics(23923);
@@ -50,11 +54,25 @@ public class DeathPulse extends JavaPlugin implements CommandExecutor {
         return deathDataManager;
     }
 
+    public DebtDataManager getDebtDataManager() {
+        if (debtDataManager == null) {
+            throw new IllegalStateException("DebtDataManager not initialized");
+        }
+        return debtDataManager;
+    }
+
     public ConfigManager getConfigManager() {
         if (configManager == null) {
             throw new IllegalStateException("ConfigManager not initialized");
         }
         return configManager;
+    }
+
+    public HealthItemManager getHealthItemManager() {
+        if (healthItemManager == null) {
+            throw new IllegalStateException("HealthItemManager not initialized");
+        }
+        return healthItemManager;
     }
 
     public BanManager getBanManager() {
@@ -79,6 +97,14 @@ public class DeathPulse extends JavaPlugin implements CommandExecutor {
         deathDataManager = new DeathDataManager(this);
     }
 
+    public void loadDebtDataManager() {
+        debtDataManager = new DebtDataManager(this);
+    }
+
+    public void loadHealthItemManager() {
+        healthItemManager = new HealthItemManager(this);
+    }
+
     public void loadBanManager() {
         banManager = new BanManager(this);
     }
@@ -97,6 +123,7 @@ public class DeathPulse extends JavaPlugin implements CommandExecutor {
         // Register Events
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new HealthItemListener(this), this);
     }
 
     private void registerCommands() {

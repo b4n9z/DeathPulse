@@ -1,0 +1,13 @@
+name: DeathPulse
+version: '2.0.0'
+main: io.github.b4n9z.deathPulse.DeathPulse
+api-version: '1.21.5'
+authors: [b4n9z]
+description: Simple Plugin Increase or Decrease Health Player When They Die
+
+commands:
+  DeathPulse:
+    aliases: [ dp ]
+    usage: /dp <subcommand>
+    description: Main command for the DeathPulse plugin
+    permissions: dp.admin

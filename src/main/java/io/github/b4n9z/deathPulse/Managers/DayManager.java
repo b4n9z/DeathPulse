@@ -5,14 +5,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DayManager {
     private final DeathPulse plugin;
     private int taskId = -1;
     private final Map<UUID, Set<String>> warnedDays = new HashMap<>();
+    private final Set<String> lastCheckedDay = ConcurrentHashMap.newKeySet();
+    private final Map<String, Boolean> dayTypeCache = Collections.synchronizedMap(new LinkedHashMap<>(100, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Boolean> eldest) {
+            return size() > 100;
+        }
+    });
+
 
     public DayManager(DeathPulse plugin) {
         this.plugin = plugin;
@@ -24,13 +32,8 @@ public class DayManager {
             Bukkit.getScheduler().cancelTask(taskId);
         }
 
-        // Schedule new task to check every 5 minutes
-        taskId = new BukkitRunnable() {
-            @Override
-            public void run() {
-                checkAndWarnPlayers();
-            }
-        }.runTaskTimer(plugin, 0, 20 * 60).getTaskId();  // 1 minutes interval
+        // Run the task asynchronously to prevent server lag
+        taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::checkAndWarnPlayers, 0, 20 * plugin.getConfigManager().getCheckDayPeriod()).getTaskId();
     }
 
     public void stop() {
@@ -38,50 +41,136 @@ public class DayManager {
             Bukkit.getScheduler().cancelTask(taskId);
             taskId = -1;
         }
-        warnedDays.clear();  // Clear memory when plugin is disabled
+        // Clear memory when plugin is disabled
+        warnedDays.clear();
+        lastCheckedDay.clear();
+        dayTypeCache.clear();
     }
 
     private void checkAndWarnPlayers() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            checkAndWarnPlayer(player);
+        // Process each world in a separate task to prevent blocking
+        for (World world : plugin.getConfigManager().getConfiguredWorlds()) {
+            Bukkit.getScheduler().runTask(plugin, () -> processWorld(world));
         }
     }
 
-    private void checkAndWarnPlayer(Player player) {
-        // Check for each day type
-        if (plugin.getConfigManager().isIncreaseEnabled() && plugin.getConfigManager().isIncreaseDayEnabled() && isMultipleDay(player, "increase")) {
-            checkAndWarnForDayType(player, "increase");
-        }
-        if (plugin.getConfigManager().isDecreaseEnabled() && plugin.getConfigManager().isDecreaseDayEnabled() && isMultipleDay(player, "decrease")) {
-            checkAndWarnForDayType(player, "decrease");
-        }
-        if (plugin.getConfigManager().isIgnoredEnabled() && plugin.getConfigManager().isIgnoredDayEnabled() && isMultipleDay(player, "ignored")) {
-            checkAndWarnForDayType(player, "ignored");
-        }
-        if (plugin.getConfigManager().isSeasonEnabled() && isMultipleDay(player, "season")) {
-            checkAndWarnForDayType(player, "season");
-        }
-    }
+    private void processWorld(World world) {
+        String worldName = world.getName();
 
-    private void checkAndWarnForDayType(Player player, String type) {
-        World world = player.getWorld();
-        int currentDay = getCurrentDay(world, type);
-        String dayKey = type + "_" + currentDay;
+        int realDay = getCurrentDay(world, "real"); // Default to real day check
+        int gameDay = getCurrentDay(world, "minecraft"); // Default to minecraft day check
 
-        // Skip if already warned for this day and type
-        if (hasBeenWarned(player.getUniqueId(), dayKey)) {
+        String dayKey = worldName + "_g" + gameDay + "_r" + realDay;
+
+        // Skip if we've already checked this day
+        if (lastCheckedDay.contains(dayKey)) {
             return;
         }
 
-        if (isMultipleDay(player, type)) {
-            String message = getWarningMessage(type);
-            if (message != null) {
-                player.sendMessage(message);
-                player.sendTitle("Day §c" + currentDay + "!§f", message, 10, 100, 20);
-                player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
-                markAsWarned(player.getUniqueId(), dayKey);
+        if (lastCheckedDay.size() > 1000) lastCheckedDay.clear();
+
+        lastCheckedDay.add(dayKey);
+
+        // Process each day type
+        boolean status = false;
+        for (String deathType: plugin.getConfigManager().getPriority()) {
+            if (deathType.equalsIgnoreCase("IGNORE")) {
+                status = processDayType(world, "ignored");
+            } else if (deathType.equalsIgnoreCase("INCREASE")) {
+                status = processDayType(world, "increase");
+            } else if (deathType.equalsIgnoreCase("DECREASE")) {
+                status = processDayType(world, "decrease");
             }
+
+            if (status) break;
         }
+
+        processDayType(world, "season");
+    }
+
+    private boolean processDayType(World world, String type) {
+        if (world == null || !isDayTypeEnabled(type) || !isMultipleDay(world, type)) {
+            return false;
+        }
+
+        boolean isIgnoredDay = isMultipleDay(world, "ignored");
+        boolean isIncreaseDay = isMultipleDay(world, "increase");
+        boolean isDecreaseDay = isMultipleDay(world, "decrease");
+
+        if (shouldSkipDayType(type, isIgnoredDay, isIncreaseDay, isDecreaseDay)) return false;
+
+        if (type.equals("season") && plugin.getConfigManager().isResetWorldDay()) {
+            long daysFirst = (System.currentTimeMillis() / (1000 * 60 * 60 * 24))-1;
+            plugin.getConfigManager().setFirstTimeSetup((int) daysFirst);
+
+            world.setTime(0);
+        }
+
+        String dayKey = type + "_" + getCurrentDay(world, getTypeDays(type));
+        String message = getWarningMessage(type);
+
+        if (message == null) {
+            return false;
+        }
+
+        // Process players in batches
+        List<Player> players = new ArrayList<>(world.getPlayers());
+        int batchSize = 100; // Process 100 players per tick
+        for (int i = 0; i < players.size(); i += batchSize) {
+            final int start = i;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                for (int j = start; j < Math.min(start + batchSize, players.size()); j++) {
+                    Player player = players.get(j);
+                    if (!hasBeenWarned(player.getUniqueId(), dayKey)) {
+                        player.sendMessage(message);
+                        player.sendTitle("§eDay §c" + getCurrentDay(world, getTypeDays(type)) + "§f!","", 10, 70, 20);
+                        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
+                        markAsWarned(player.getUniqueId(), dayKey);
+                    }
+                }
+            });
+        }
+
+        return true;
+    }
+
+    public boolean processDayTypePerPlayer(Player player, String type) {
+        World world = player.getWorld();
+        if (isDayTypeEnabled(type) && isMultipleDay(world, type)) {
+            boolean isIgnoredDay = isMultipleDay(world, "ignored");
+            boolean isIncreaseDay = isMultipleDay(world, "increase");
+            boolean isDecreaseDay = isMultipleDay(world, "decrease");
+
+            if (shouldSkipDayType(type, isIgnoredDay, isIncreaseDay, isDecreaseDay)) return false;
+
+            String dayKey = type + "_" + getCurrentDay(world, getTypeDays(type));
+            if (hasBeenWarned(player.getUniqueId(), dayKey)) {
+                return false;
+            }
+
+            String message = getWarningMessage(type);
+            if (message == null) {
+                return false;
+            }
+
+            // Process One player
+            player.sendMessage(message);
+            player.sendTitle("§eDay §c" + getCurrentDay(world, getTypeDays(type)) + "§f!","", 10, 70, 20);
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
+            markAsWarned(player.getUniqueId(), dayKey);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isDayTypeEnabled(String type) {
+        return switch (type.toLowerCase()) {
+            case "ignored" -> plugin.getConfigManager().isIgnoredDayEnabled();
+            case "increase" -> plugin.getConfigManager().isIncreaseDayEnabled();
+            case "decrease" -> plugin.getConfigManager().isDecreaseDayEnabled();
+            case "season" -> plugin.getConfigManager().isSeasonEnabled();
+            default -> false;
+        };
     }
 
     private boolean hasBeenWarned(UUID playerId, String dayKey) {
@@ -94,20 +183,19 @@ public class DayManager {
 
     private String getWarningMessage(String type) {
         return switch (type.toLowerCase()) {
+            case "ignored" -> plugin.getConfigManager().getIgnoredDayWarning();
             case "increase" -> plugin.getConfigManager().getIncreaseDayWarning();
             case "decrease" -> plugin.getConfigManager().getDecreaseDayWarning();
-            case "ignored" -> plugin.getConfigManager().getIgnoredDayWarning();
             case "season" -> plugin.getConfigManager().getSeasonChangeWarning();
             default -> null;
         };
     }
 
-    public int getSeason(Player player, String type) {
-        World world = player.getWorld();
-        int currentDay = getCurrentDay(world, type);
+    public int getSeason(World world, String type) {
+        int currentDay = getCurrentDay(world, getTypeDays(type));
         List<Integer> days = getDaysForType(type);
         int season = 1;
-        if (isMultipleDay(player, type)) {
+        if (isMultipleDay(world, type)) {
             for (int day : days) {
                 return (currentDay / day)+1;
             }
@@ -115,41 +203,53 @@ public class DayManager {
         return season;
     }
 
-    public int getCurrentDay(World world, String type) {
-        String dayType = switch (type) {
-            case "increase" -> plugin.getConfigManager().getIncreaseDayType();
-            case "ignored" -> plugin.getConfigManager().getIgnoredDayType();
-            case "decrease" -> plugin.getConfigManager().getDecreaseDayType();
-            default -> plugin.getConfigManager().getSeasonType();
-        };
-
+    public int getCurrentDay(World world, String dayType) {
         if ("real".equalsIgnoreCase(dayType)) {
             long currentTimeMillis = System.currentTimeMillis();
             return (int) (currentTimeMillis / (1000 * 60 * 60 * 24)) - plugin.getConfigManager().getFirstTimeSetup();
         } else {
-            return (int) (world.getFullTime() / 24000);
+            return (int) (world.getFullTime() / plugin.getConfigManager().getTicksPerDay(world));
         }
     }
 
-    public boolean isMultipleDay(Player player, String type) {
-        World world = player.getWorld();
-        int currentDay = getCurrentDay(world, type);
+    public boolean isMultipleDay(World world, String type) {
+        int currentDay = getCurrentDay(world, getTypeDays(type));
+        String cacheKey = world.getName() + "_" + type + "_" + currentDay;
+
+        // Check cache first
+        if (dayTypeCache.containsKey(cacheKey)) {
+            return dayTypeCache.get(cacheKey);
+        }
+
         List<Integer> days = getDaysForType(type);
+        boolean result = false;
 
         for (int day : days) {
             if (currentDay % day == 0 && currentDay != 0) {
-                return true;
+                result = true;
+                break;
             }
         }
-        return false;
+        dayTypeCache.put(cacheKey, result);
+
+        return result;
+    }
+
+    public String getTypeDays(String type) {
+        return switch (type.toLowerCase()) {
+            case "ignored" -> plugin.getConfigManager().getIgnoredDayType();
+            case "increase" -> plugin.getConfigManager().getIncreaseDayType();
+            case "decrease" -> plugin.getConfigManager().getDecreaseDayType();
+            default -> plugin.getConfigManager().getSeasonType();
+        };
     }
 
     private List<Integer> getDaysForType(String type) {
         List<Integer> seasonDayList = new ArrayList<>();
         seasonDayList.add(plugin.getConfigManager().getSeasonDay());
         return switch (type.toLowerCase()) {
-            case "increase" -> plugin.getConfigManager().getIncreaseDays();
             case "ignored" -> plugin.getConfigManager().getIgnoredDays();
+            case "increase" -> plugin.getConfigManager().getIncreaseDays();
             case "decrease" -> plugin.getConfigManager().getDecreaseDays();
             default -> seasonDayList;
         };
@@ -160,4 +260,17 @@ public class DayManager {
         long daysFirst = (System.currentTimeMillis() / (1000 * 60 * 60 * 24))-1;
         plugin.getConfigManager().setFirstTimeSetup((int) daysFirst);
     }
+
+    private boolean shouldSkipDayType(String current, boolean ignored, boolean increase, boolean decrease) {
+        return switch (current.toLowerCase()) {
+            case "ignored" -> (increase && plugin.getConfigManager().isIncreaseDayDeActiveIgnoredDay()) ||
+                    (decrease && plugin.getConfigManager().isDecreaseDayDeActiveIgnoredDay());
+            case "increase" -> (ignored && plugin.getConfigManager().isIgnoredDayDeActiveIncreaseDay()) ||
+                    (decrease && plugin.getConfigManager().isDecreaseDayDeActiveIncreaseDay());
+            case "decrease" -> (ignored && plugin.getConfigManager().isIgnoredDayDeActiveDecreaseDay()) ||
+                    (increase && plugin.getConfigManager().isIncreaseDayDeActiveDecreaseDay());
+            default -> false;
+        };
+    }
+
 }

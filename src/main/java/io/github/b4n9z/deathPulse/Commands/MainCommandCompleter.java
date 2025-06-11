@@ -26,13 +26,21 @@ public class MainCommandCompleter implements TabCompleter {
             if (sender.hasPermission("dp.reload") || plugin.getConfigManager().isPermissionAllPlayerReload()) {
                 commands.add("reload");
             }
+            if (sender.hasPermission("dp.setConfig") || plugin.getConfigManager().isPermissionAllPlayerSetConfig()) {
+                commands.add("setConfig");
+            }
             if (sender.hasPermission("dp.setMaxHealth") || plugin.getConfigManager().isPermissionAllPlayerSetMaxHealth()) {
                 commands.add("setMaxHealth");
             }
             if (sender.hasPermission("dp.viewHealth") || plugin.getConfigManager().isPermissionAllPlayerViewHealth()) {
                 commands.add("viewHealth");
             }
-            commands.add("viewDeathData");
+            if (sender.hasPermission("dp.viewDeathData") || plugin.getConfigManager().isPermissionAllPlayerViewDeathData()) {
+                commands.add("viewDeathData");
+            }
+            if (sender.hasPermission("dp.viewDebtData") || plugin.getConfigManager().isPermissionAllPlayerViewDebtData()) {
+                commands.add("viewDebtData");
+            }
             if (sender.hasPermission("dp.resetHealth") || plugin.getConfigManager().isPermissionAllPlayerResetHealth()) {
                 commands.add("resetHealth");
             }
@@ -42,8 +50,14 @@ public class MainCommandCompleter implements TabCompleter {
             if (sender.hasPermission("dp.removeDeathData") || plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
                 commands.add("removeDeathData");
             }
+            if (sender.hasPermission("dp.removeDebtData") || plugin.getConfigManager().isPermissionAllPlayerRemoveDebtData()) {
+                commands.add("removeDebtData");
+            }
             if (sender.hasPermission("dp.transferHealth") || plugin.getConfigManager().isPermissionAllPlayerTransferHealth()) {
                 commands.add("transferHealth");
+            }
+            if (sender.hasPermission("dp.withdrawHealth") || plugin.getConfigManager().isPermissionAllPlayerWithdrawHealth()) {
+                commands.add("withdrawHealth");
             }
             if (sender.hasPermission("dp.help") || plugin.getConfigManager().isPermissionAllPlayerHelp()) {
                 commands.add("help");
@@ -54,11 +68,14 @@ public class MainCommandCompleter implements TabCompleter {
                 }
             }
         } else if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("setMaxHealth") || args[0].equalsIgnoreCase("viewHealth") || args[0].equalsIgnoreCase("resetHealth") || args[0].equalsIgnoreCase("matchHealth") || args[0].equalsIgnoreCase("removeDeathData") || args[0].equalsIgnoreCase("transferHealth")) {
+            if (args[0].equalsIgnoreCase("setMaxHealth") || args[0].equalsIgnoreCase("viewHealth") || args[0].equalsIgnoreCase("resetHealth") || args[0].equalsIgnoreCase("matchHealth") || args[0].equalsIgnoreCase("removeDeathData") || args[0].equalsIgnoreCase("removeDebtData") || args[0].equalsIgnoreCase("transferHealth")) {
                 // Autocomplete player names
-                if (args[0].equalsIgnoreCase("resetHealth") || args[0].equalsIgnoreCase("matchHealth") || args[0].equalsIgnoreCase("removeDeathData")) {
+                if (args[0].equalsIgnoreCase("resetHealth") || args[0].equalsIgnoreCase("matchHealth") || args[0].equalsIgnoreCase("removeDeathData") || args[0].equalsIgnoreCase("removeDebtData")) {
                     completions.add("allPlayer");
                     for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+                        if (offlinePlayer.isOnline()) {
+                            continue;
+                        }
                         completions.add(offlinePlayer.getUniqueId().toString());
                     }
                 }
@@ -66,9 +83,34 @@ public class MainCommandCompleter implements TabCompleter {
                     completions.add(player.getName());
                 }
             }
+            if (args[0].equalsIgnoreCase("withdrawHealth")) {
+                completions.add("[<amount>]");
+            }
+            if (args[0].equalsIgnoreCase("setConfig")) {
+                completions.addAll(plugin.getConfigManager().getAllConfigPaths());
+            }
         } else if (args.length == 3) {
             if (args[0].equalsIgnoreCase("setMaxHealth") || args[0].equalsIgnoreCase("transferHealth")) {
                 completions.add("[<amount>]");
+            }
+            if (args[0].equalsIgnoreCase("setConfig")) {
+                String path = args[1];
+                Object val = plugin.getConfig().get(path);
+                if (val instanceof Boolean) {
+                    completions.addAll(List.of("true", "false"));
+                } else if (val instanceof List) {
+                    completions.addAll(List.of("add", "remove"));
+                } else if (val instanceof String) {
+                    completions.add("\"your string here\"");
+                } else if (val instanceof Integer) {
+                    completions.add("[<number>]");
+                }
+            }
+        } else if (args.length == 4) {
+            if (args[0].equalsIgnoreCase("setConfig")) {
+                if (plugin.getConfig().get(args[1]) instanceof List) {
+                    completions.add("<value>");
+                }
             }
         }
         return completions;

@@ -2,6 +2,9 @@ package io.github.b4n9z.deathPulse.Commands;
 
 import io.github.b4n9z.deathPulse.DeathPulse;
 import io.github.b4n9z.deathPulse.Managers.HealthManager;
+import io.github.b4n9z.deathPulse.Managers.TransactionManager;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -11,7 +14,6 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,7 +27,7 @@ public class MatchHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.matchHealth")) || !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
+            if (!(player.isOp()) && !(player.hasPermission("dp.matchHealth")) && !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -40,29 +42,157 @@ public class MatchHealthCommand implements CommandExecutor {
         }
 
         if (args[1].equalsIgnoreCase("allPlayer")) {
+            requestMatchHealthAll(sender);
+        } else {
+            Player targetPlayer = Bukkit.getPlayer(args[1]);
+            if (targetPlayer == null) {
+                if (plugin.getConfigManager().isValidUUID(args[1])) {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(args[1]));
+                    if (!offlinePlayer.hasPlayedBefore()) {
+                        sender.sendMessage("§cPlayer not found.");
+                        return true;
+                    }
+                    requestMatchHealthSingle(sender, offlinePlayer);
+                } else {
+                    sender.sendMessage("§cInvalid player name or UUID.");
+                }
+            } else {
+                requestMatchHealthSingle(sender, targetPlayer);
+            }
+        }
+        return true;
+    }
+
+    private void requestMatchHealthSingle(CommandSender sender, OfflinePlayer target) {
+        String transactionId = TransactionManager.generateTransactionId(sender);
+        TransactionManager.openTransaction(plugin, sender, transactionId);
+
+        TextComponent message = new TextComponent("§fAre§b you§f sure you want to match health for§b " + target.getName() + "§f? ");
+        TextComponent yes = new TextComponent("[YES]");
+        yes.setColor(net.md_5.bungee.api.ChatColor.GREEN);
+        yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse confirmMatchHealth " + target.getUniqueId() + " " + transactionId));
+
+        TextComponent no = new TextComponent("[NO]");
+        no.setColor(net.md_5.bungee.api.ChatColor.RED);
+        no.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse cancelMatchHealth " + transactionId));
+
+        message.addExtra("\n");
+        message.addExtra(yes);
+        message.addExtra(" ");
+        message.addExtra(no);
+
+        sender.spigot().sendMessage(message);
+    }
+
+    private void requestMatchHealthAll(CommandSender sender) {
+        String transactionId = TransactionManager.generateTransactionId(sender);
+        TransactionManager.openTransaction(plugin, sender, transactionId);
+
+        TextComponent message = new TextComponent("§fAre§b you§f sure you want to match health for§e ALL players§f? ");
+        TextComponent yes = new TextComponent("[YES]");
+        yes.setColor(net.md_5.bungee.api.ChatColor.GREEN);
+        yes.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse confirmMatchHealth allPlayer " + transactionId));
+
+        TextComponent no = new TextComponent("[NO]");
+        no.setColor(net.md_5.bungee.api.ChatColor.RED);
+        no.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/deathpulse cancelMatchHealth " + transactionId));
+
+        message.addExtra("\n");
+        message.addExtra(yes);
+        message.addExtra(" ");
+        message.addExtra(no);
+
+        sender.spigot().sendMessage(message);
+    }
+
+    public boolean confirmMatchHealth(CommandSender sender, String[] args) {
+        if (sender instanceof Player player){
+            if (!(player.isOp()) && !(player.hasPermission("dp.matchHealth")) && !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
+                return false;
+            }
+        } else if (!(sender instanceof ConsoleCommandSender)) {
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
+            return false;
+        }
+
+        if (args.length != 3) {
+            sender.sendMessage("§fUsage:§c /DeathPulse§b confirmMatchHealth§f <playerUUID|allPlayer> <transactionID>");
+            return false;
+        }
+
+        String target = args[1];
+        String transactionId = args[2];
+
+        if (!TransactionManager.isValidTransaction(sender, transactionId)) {
+            sender.sendMessage("§cThis confirmation has expired or is invalid.");
+            return false;
+        }
+
+        if (target.equalsIgnoreCase("allPlayer")) {
             // Match health for all players based on their death data
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                 matchPlayerHealth(onlinePlayer, sender);
             }
 
-            for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-                matchOfflinePlayerHealth(offlinePlayer, sender);
-            }
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+                    if (!offlinePlayer.hasPlayedBefore() || offlinePlayer.isOnline()) continue;
 
-            sender.sendMessage("§bAll players'§f health has been matched based on their§e death data§f.");
+                    matchOfflinePlayerHealth(offlinePlayer, sender);
+                }
+                if (sender instanceof Player) {
+                    sender.sendMessage("§bAll players'§f health has been matched (async) based on their§e death data§f.");
+                }
+            });
         } else {
             // Match health for specified player based on their death data
             Player targetPlayer = Bukkit.getPlayer(args[1]);
             if (targetPlayer == null) {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(args[1]));
-                if (!offlinePlayer.hasPlayedBefore()) {
-                    sender.sendMessage("§cPlayer not found.");
+                if (plugin.getConfigManager().isValidUUID(args[1])) {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(args[1]));
+                    if (!offlinePlayer.hasPlayedBefore()) {
+                        sender.sendMessage("§cPlayer not found.");
+                        TransactionManager.closeTransaction(sender);
+                        return true;
+                    }
+                    matchOfflinePlayerHealth(offlinePlayer, sender);
+                } else {
+                    sender.sendMessage("§cInvalid player name or UUID.");
+                    TransactionManager.closeTransaction(sender);
                     return true;
                 }
-                matchOfflinePlayerHealth(offlinePlayer, sender);
             } else {
                 matchPlayerHealth(targetPlayer, sender);
             }
+        }
+
+        TransactionManager.closeTransaction(sender);
+        return true;
+    }
+
+    public boolean cancelMatchHealth(CommandSender sender, String[] args) {
+        if (sender instanceof Player player){
+            if (!(player.isOp()) && !(player.hasPermission("dp.matchHealth")) && !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
+                sender.sendMessage("§fYou§c do not have permission§f to use this command.");
+                return false;
+            }
+        } else if (!(sender instanceof ConsoleCommandSender)) {
+            sender.sendMessage("§fThis command§c can only be run§f by a player or from the console.");
+            return false;
+        }
+
+        if (args.length != 2) {
+            sender.sendMessage("§fUsage:§c /DeathPulse§b cancelMatchHealth§f <transactionID>");
+            return false;
+        }
+
+        String transactionId = args[1];
+        if (!transactionId.isEmpty() && TransactionManager.isValidTransaction(sender, transactionId)) {
+            TransactionManager.closeTransaction(sender);
+            sender.sendMessage("§bMatch health§f has been§c cancelled.");
+        } else {
+            sender.sendMessage("§cNo active transaction to cancel or invalid transaction ID.");
         }
         return true;
     }
@@ -91,56 +221,55 @@ public class MatchHealthCommand implements CommandExecutor {
     }
 
     private void matchOfflinePlayerHealth(OfflinePlayer player, CommandSender sender) {
-        if(player.isOnline()) return;
         UUID playerUUID = player.getUniqueId();
         Set<String> deathData = plugin.getDeathDataManager().loadPlayerDeaths(playerUUID);
+        int matchedHealth;
+
         if (deathData.isEmpty()) {
-            HealthManager.setOfflinePlayerMaxHealth(plugin.getConfigManager().getHPStart(), player);
-            sender.sendMessage("§b" + player.getName() + "§c has no recorded§e death data.");
+            matchedHealth = plugin.getConfigManager().getHPStart();
         } else {
-            int matchedHealth = calculateHealthFromDeathData(deathData);
+            matchedHealth = calculateHealthFromDeathData(deathData);
+        }
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
             if (matchedHealth <= 0) {
                 if (plugin.getConfigManager().getMinHPBanTime() == 0) {
                     plugin.getBanManager().banOfflinePlayerPermanently(player);
                 } else {
-                    plugin.getBanManager().banOfflinePlayer(player, (long) plugin.getConfigManager().getMinHPBanTime() * 60 * 60 * 1000);
+                    plugin.getBanManager().banOfflinePlayer(player, plugin.getConfigManager().getMinHPBanTime() * 60L * 60 * 1000);
                 }
-                sender.sendMessage("§fBanned§b " + player.getName() + "§f because their health is§c 0§f or less, and they are§c offline§f.");
+                sender.sendMessage("§fBanned§b " + player.getName() + "§f because their health is§c 0§f or less (offline).");
             } else {
                 HealthManager.setOfflinePlayerMaxHealth(matchedHealth, player);
                 sender.sendMessage("§fSet§b " + player.getName() + "§f health to§b " + matchedHealth + "§f based on their§e death data.");
             }
-        }
+        });
     }
 
     private boolean isValidDay(String deathCause, int day, String typeDeath) {
         String keyword = typeDeath+"Day_";
         int startIndex = deathCause.indexOf(keyword);
-        if (startIndex == -1) {
-            return false; // If "increaseDay_" or " "decreaseDay_" not found, return false
-        }
+        if (startIndex == -1) return false; // If "increaseDay_" or " "decreaseDay_" not found, return false
+
         startIndex += keyword.length(); // Position after "increaseDay_" or "decreaseDay_"
 
         int endIndex = deathCause.indexOf('_', startIndex); // Position of the next underscore
-        if (endIndex == -1) {
-            endIndex = deathCause.indexOf(']', startIndex); // If no next underscore, use position of the closing bracket
-        }
+        if (endIndex == -1) endIndex = deathCause.indexOf(']', startIndex); // If no next underscore, use position of the closing bracket
+        if (endIndex == -1) return false;
 
         try {
             int deathDay = Integer.parseInt(deathCause.substring(startIndex, endIndex));
-            return deathDay % day == 0;
+            return day != 0 && deathDay % day == 0;
         } catch (NumberFormatException e) {
             return false; // If parsing fails, return false
         }
     }
 
     private boolean isCauseMatch(Set<String> causes, String deathCause, String suffix, String typeDeath) {
-        if (!deathCause.endsWith(suffix) && !typeDeath.equals("DAY")) {
-            return false;
-        }
-        if (causes.contains("all")) {
-            return true;
-        }
+        if (!deathCause.endsWith(suffix) && !typeDeath.equals("DAY")) return false;
+
+        if (causes.contains("ALL")) return true;
+
         return causes.stream().anyMatch(cause -> {
             int bracketIndex = deathCause.indexOf('[');
             String deathCauseWithoutSuffix = bracketIndex != -1 ? deathCause.substring(0, bracketIndex) : deathCause;
@@ -148,58 +277,55 @@ public class MatchHealthCommand implements CommandExecutor {
         });
     }
 
+    private String splitCause(String deathCause) {
+        int bracketIndex = deathCause.indexOf('[');
+        return bracketIndex != -1 ? deathCause.substring(0, bracketIndex) : deathCause;
+    }
+
     private int calculateHealthFromDeathData(Set<String> deathData) {
-        int startHealth = plugin.getConfigManager().getHPStart();
-        boolean isMaxHPEnabled = plugin.getConfigManager().isMaxHPEnabled();
-        int MaxHPAmount = plugin.getConfigManager().getMaxHPAmount();
-        boolean isMinHPEnabled = plugin.getConfigManager().isMinHPEnabled();
-        int MinHPAmount = plugin.getConfigManager().getMinHPAmount();
+        Set<String> increaseCause = new HashSet<>(plugin.getConfigManager().getIncreaseCauseName());
+        Set<String> increaseDayCause = new HashSet<>(plugin.getConfigManager().getIncreaseDayCauseName());
 
-        boolean isIncreaseEnabled = plugin.getConfigManager().isIncreaseEnabled();
-        int increasePerDeath = plugin.getConfigManager().getIncreasePerDeath();
-        boolean isIncreaseDayEnabled = plugin.getConfigManager().isIncreaseDayEnabled();
-        boolean isIncreaseDaySameCauseRequired = plugin.getConfigManager().isIncreaseDaySameCauseRequired();
-        List<Integer> increaseDays = plugin.getConfigManager().getIncreaseDays();
-        int increaseDayAmount = plugin.getConfigManager().getIncreaseDayAmount();
-        Set<String> increaseCause = new HashSet<>(plugin.getConfigManager().getIncreaseCause());
+        Set<String> decreaseCause = new HashSet<>(plugin.getConfigManager().getDecreaseCauseName());
+        Set<String> decreaseDayCause = new HashSet<>(plugin.getConfigManager().getDecreaseDayCauseName());
 
-        boolean isDecreaseEnabled = plugin.getConfigManager().isDecreaseEnabled();
-        int decreasePerDeath = plugin.getConfigManager().getDecreasePerDeath();
-        boolean isDecreaseDayEnabled = plugin.getConfigManager().isDecreaseDayEnabled();
-        boolean isDecreaseDaySameCauseRequired = plugin.getConfigManager().isDecreaseDaySameCauseRequired();
-        List<Integer> decreaseDays = plugin.getConfigManager().getDecreaseDays();
-        int decreaseDayAmount = plugin.getConfigManager().getDecreaseDayAmount();
-        Set<String> decreaseCause = new HashSet<>(plugin.getConfigManager().getDecreaseCause());
+        long increaseHealth = 0;
+        long increaseDaysHealth = 0;
+        long decreaseHealth = 0;
+        long decreaseDaysHealth = 0;
 
-        long validIncreaseCount = deathData.stream()
-                .filter(deathCause -> (isIncreaseEnabled && (isCauseMatch(increaseCause, deathCause, "[Increase]",""))))
-                .count();
-        long validIncreaseDaysCount = deathData.stream()
-                .filter(deathCause -> (isIncreaseEnabled && isIncreaseDayEnabled && (
-                        (!isIncreaseDaySameCauseRequired && deathCause.startsWith("increaseDay") && increaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "increase")))
-                        || (isIncreaseDaySameCauseRequired && (isCauseMatch(increaseCause, deathCause, "[Increase]","DAY")) && (increaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "increase"))))
-                )))
-                .count();
+        for (String deathCause : deathData) {
+            String causeDeath = splitCause(deathCause);
 
-        long validDecreaseCount = deathData.stream()
-                .filter(deathCause -> (isDecreaseEnabled && (isCauseMatch(decreaseCause, deathCause, "[Decrease]",""))))
-                .count();
-        long validDecreaseDaysCount = deathData.stream()
-                .filter(deathCause -> (isDecreaseEnabled && isDecreaseDayEnabled && (
-                        (!isDecreaseDaySameCauseRequired && deathCause.startsWith("decreaseDay") && decreaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "decrease")))
-                        || (isDecreaseDaySameCauseRequired && (isCauseMatch(decreaseCause, deathCause, "[Decrease]","DAY")) && (decreaseDays.stream().anyMatch(day -> isValidDay(deathCause, day, "decrease"))))
-                )))
-                .count();
-
-        int totalHealth = (int) (startHealth + (validIncreaseCount * increasePerDeath) + (validIncreaseDaysCount * increaseDayAmount) - (validDecreaseCount * decreasePerDeath) - (validDecreaseDaysCount * decreaseDayAmount));
-
-        if (isMaxHPEnabled){
-            totalHealth = Math.min(totalHealth, MaxHPAmount);
+            if (plugin.getConfigManager().isIncreaseEnabled() && (isCauseMatch(increaseCause, deathCause, "[Increase]",""))){
+                increaseHealth += plugin.getConfigManager().getIncreaseCauseAmount(causeDeath);
+            }
+            if (plugin.getConfigManager().isIncreaseDayEnabled() && (isCauseMatch(increaseDayCause, deathCause, "[Increase]","DAY"))){
+                for (int day : plugin.getConfigManager().getIncreaseDays()) {
+                    if (isValidDay(deathCause, day, "increase")) {
+                        increaseDaysHealth += plugin.getConfigManager().getIncreaseDayCauseAmount(causeDeath);
+                        break;
+                    }
+                }
+            }
+            if (plugin.getConfigManager().isDecreaseEnabled() && (isCauseMatch(decreaseCause, deathCause, "[Decrease]",""))){
+                decreaseHealth += plugin.getConfigManager().getDecreaseCauseAmount(causeDeath);
+            }
+            if (plugin.getConfigManager().isDecreaseDayEnabled() && (isCauseMatch(decreaseDayCause, deathCause, "[Decrease]","DAY"))){
+                for (int day : plugin.getConfigManager().getDecreaseDays()) {
+                    if (isValidDay(deathCause, day, "decrease")) {
+                        decreaseDaysHealth += plugin.getConfigManager().getDecreaseDayCauseAmount(causeDeath);
+                        break;
+                    }
+                }
+            }
         }
 
-        if (isMinHPEnabled){
-            totalHealth = Math.max(totalHealth, MinHPAmount);
-        }
+        int totalHealth = (int) (plugin.getConfigManager().getHPStart() + increaseHealth + increaseDaysHealth - decreaseHealth - decreaseDaysHealth);
+
+        if (plugin.getConfigManager().isMaxHPEnabled()) totalHealth = Math.min(totalHealth, plugin.getConfigManager().getMaxHPAmount());
+
+        if (plugin.getConfigManager().isMinHPEnabled()) totalHealth = Math.max(totalHealth, plugin.getConfigManager().getMinHPAmount());
 
         return totalHealth;
     }

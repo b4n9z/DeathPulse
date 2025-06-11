@@ -1,39 +1,41 @@
 package io.github.b4n9z.deathPulse.Commands;
 
 import io.github.b4n9z.deathPulse.DeathPulse;
-import io.github.b4n9z.deathPulse.Managers.HealthManager;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 public class MainCommand implements CommandExecutor {
     private final DeathPulse plugin;
     private final ReloadPluginCommand reloadPluginCommand;
+    private final SetConfigCommand setConfigCommand;
     private final SetMaxHealthCommand setMaxHealthCommand;
     private final ViewHealthCommand viewHealthCommand;
-    private final ViewDeathData viewDeathData;
+    private final ViewDeathDataCommand viewDeathData;
+    private final ViewDebtDataCommand viewDebtData;
     private final ResetHealthCommand resetHealthCommand;
     private final MatchHealthCommand matchHealthCommand;
     private final RemoveDeathDataCommand removeDeathDataCommand;
+    private final RemoveDebtDataCommand removeDebtDataCommand;
     private final TransferHealthCommand transferHealthCommand;
+    private final WithdrawHealthCommand withdrawHealthCommand;
     private final HelpCommand helpCommand;
 
     public MainCommand(DeathPulse plugin) {
         this.plugin = plugin;
-        this.reloadPluginCommand = new ReloadPluginCommand(plugin);
-        this.setMaxHealthCommand = new SetMaxHealthCommand(plugin);
-        this.viewHealthCommand = new ViewHealthCommand(plugin);
-        this.viewDeathData = new ViewDeathData(plugin);
-        this.resetHealthCommand = new ResetHealthCommand(plugin);
-        this.matchHealthCommand = new MatchHealthCommand(plugin);
-        this.removeDeathDataCommand = new RemoveDeathDataCommand(plugin);
-        this.transferHealthCommand = new TransferHealthCommand(plugin);
-        this.helpCommand = new HelpCommand(plugin);
+        this.reloadPluginCommand = new ReloadPluginCommand(this.plugin);
+        this.setConfigCommand = new SetConfigCommand(this.plugin);
+        this.setMaxHealthCommand = new SetMaxHealthCommand(this.plugin);
+        this.viewHealthCommand = new ViewHealthCommand(this.plugin);
+        this.viewDeathData = new ViewDeathDataCommand(this.plugin);
+        this.viewDebtData = new ViewDebtDataCommand(this.plugin);
+        this.resetHealthCommand = new ResetHealthCommand(this.plugin);
+        this.matchHealthCommand = new MatchHealthCommand(this.plugin);
+        this.removeDeathDataCommand = new RemoveDeathDataCommand(this.plugin);
+        this.removeDebtDataCommand = new RemoveDebtDataCommand(this.plugin);
+        this.transferHealthCommand = new TransferHealthCommand(this.plugin);
+        this.withdrawHealthCommand = new WithdrawHealthCommand(this.plugin);
+        this.helpCommand = new HelpCommand(this.plugin);
     }
 
     @Override
@@ -46,73 +48,29 @@ public class MainCommand implements CommandExecutor {
         String subCommand = args[0];
         return switch (subCommand) {
             case "reload" -> reloadPluginCommand.onCommand(sender, command, label, args);
+            case "setConfig" -> setConfigCommand.onCommand(sender, command, label, args);
             case "setMaxHealth" -> setMaxHealthCommand.onCommand(sender, command, label, args);
             case "viewHealth" -> viewHealthCommand.onCommand(sender, command, label, args);
             case "viewDeathData" -> viewDeathData.onCommand(sender, command, label, args);
+            case "viewDebtData" -> viewDebtData.onCommand(sender, command, label, args);
             case "resetHealth" -> resetHealthCommand.onCommand(sender, command, label, args);
+            case "confirmResetHealth" -> resetHealthCommand.confirmResetHealth(sender, args);
+            case "cancelResetHealth" -> resetHealthCommand.cancelResetHealth(sender, args);
             case "matchHealth" -> matchHealthCommand.onCommand(sender, command, label, args);
+            case "confirmMatchHealth" -> matchHealthCommand.confirmMatchHealth(sender, args);
+            case "cancelMatchHealth" -> matchHealthCommand.cancelMatchHealth(sender, args);
             case "removeDeathData" -> removeDeathDataCommand.onCommand(sender, command, label, args);
+            case "confirmRemoveDeathData" -> removeDeathDataCommand.confirmRemoveDeathData(sender, args);
+            case "confirmRemoveAllDeathData" -> removeDeathDataCommand.confirmRemoveAllDeathData(sender, args);
+            case "cancelRemoveDeathData" -> removeDeathDataCommand.cancelRemoveDeathData(sender, args);
+            case "removeDebtData" -> removeDebtDataCommand.onCommand(sender, command, label, args);
+            case "confirmRemoveDebtData" -> removeDebtDataCommand.confirmRemoveDebtData(sender, args);
+            case "confirmRemoveAllDebtData" -> removeDebtDataCommand.confirmRemoveAllDebtData(sender, args);
+            case "cancelRemoveDebtData" -> removeDebtDataCommand.cancelRemoveDebtData(sender, args);
             case "transferHealth" -> transferHealthCommand.onCommand(sender, command, label, args);
-            case "confirmRemoveDeathData" -> {
-                if (sender instanceof Player player) {
-                    if (!(player.isOp()) || !(player.hasPermission("dp.removeDeathData")) || !plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
-                        sender.sendMessage("§fYou§c do not have permission§f to use this command.");
-                        yield false;
-                    }
-                }
-                if (args.length != 2) {
-                    sender.sendMessage("§fUsage:§c /DeathPulse§b confirmRemoveDeathData§f <playerUUID>");
-                    yield false;
-                }
-                UUID playerUUID = UUID.fromString(args[1]);
-                boolean success = plugin.getDeathDataManager().removePlayerDeathData(playerUUID);
-                if (success) {
-                    sender.sendMessage("§bDeath data§f for player§b " + Bukkit.getOfflinePlayer(playerUUID).getName() + "§f has been§c removed§f.");
-                } else {
-                    sender.sendMessage("§cFailed to remove§b death data§f for player§b " + Bukkit.getOfflinePlayer(playerUUID).getName() + "§f. §cPlease try again.");
-                }
-                yield true;
-            }
-            case "confirmRemoveAllDeathData" -> {
-                if (sender instanceof Player player) {
-                    if (!(player.isOp()) || !(player.hasPermission("dp.removeDeathData")) || !plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
-                        sender.sendMessage("§fYou§c do not have permission§f to use this command.");
-                        yield false;
-                    }
-                }
-                boolean success = plugin.getDeathDataManager().removeAllDeathData();
-                if (success) {
-                    sender.sendMessage("§bDeath data§f for§b all players§f has been§c removed§f.");
-                } else {
-                    sender.sendMessage("§cFailed to remove§b death data§f for§b all players§f.§c Please try again.");
-                }
-                yield true;
-            }
-            case "cancelRemoveDeathData" -> {
-                sender.sendMessage("§bDeath data§f removal has been§c cancelled.");
-                yield true;
-            }
-            case "confirmTransferHealth" -> {
-                if (sender instanceof Player player) {
-                    if (!(player.isOp()) || !(player.hasPermission("dp.transferHealth")) || !plugin.getConfigManager().isPermissionAllPlayerTransferHealth()) {
-                        sender.sendMessage("§fYou§c do not have permission§f to use this command.");
-                        yield false;
-                    }
-                    if (args.length != 3) {
-                        sender.sendMessage("§fUsage:§c /DeathPulse§b confirmTransferHealth§f <playerUUID> <amount>");
-                        yield false;
-                    }
-
-                    transferHealthCommand.confirmedTransferHealth(player, args[1], Double.parseDouble(args[2]));
-
-                    yield true;
-                }
-                yield false;
-            }
-            case "cancelTransferHealth" -> {
-                sender.sendMessage("§bTransfer health§f has been§c cancelled.");
-                yield true;
-            }
+            case "confirmTransferHealth" -> transferHealthCommand.confirmedTransferHealth(sender, args);
+            case "cancelTransferHealth" -> transferHealthCommand.cancelTransferHealth(sender, args);
+            case "withdrawHealth" -> withdrawHealthCommand.onCommand(sender, command, label, args);
             case "help" -> helpCommand.onCommand(sender, command, label, args);
             default -> {
                 sender.sendMessage("§cUnknown subcommand.");

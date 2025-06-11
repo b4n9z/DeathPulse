@@ -24,7 +24,11 @@ public class DeathDataManager {
     public DeathDataManager(Plugin plugin) {
         this.plugin = plugin;
         this.dataFolder = new File(plugin.getDataFolder(), "death_data");
-        if (!dataFolder.exists()) dataFolder.mkdirs();
+        if (!dataFolder.exists()) {
+            if (!dataFolder.mkdirs()) {
+                throw new RuntimeException("Failed to create data directory: " + dataFolder.getAbsolutePath());
+            }
+        }
     }
 
     public boolean logDeath(UUID playerUUID, String deathCause) {
@@ -78,7 +82,7 @@ public class DeathDataManager {
                 playerDeathCache.remove(playerUUID);
                 File file = new File(dataFolder, playerUUID.toString() + ".json");
                 if (file.exists()) {
-                    file.delete();
+                    return file.delete(); // Failed to delete the file
                 }
                 return true; // Successful deletion
             } finally {
@@ -95,9 +99,14 @@ public class DeathDataManager {
                 playerDeathCache.clear();
                 File[] files = dataFolder.listFiles((dir, name) -> name.endsWith(".json"));
                 if (files != null) {
+                    int count = files.length;
+                    int deleted = 0;
                     for (File file : files) {
-                        file.delete();
+                        if (file.delete()) {
+                            deleted++;
+                        }
                     }
+                    return deleted == count;
                 }
                 return true; // Successful deletion
             } finally {

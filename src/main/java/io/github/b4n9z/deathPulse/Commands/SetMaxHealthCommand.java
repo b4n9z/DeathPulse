@@ -22,7 +22,7 @@ public class SetMaxHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.setMaxHealth")) || !plugin.getConfigManager().isPermissionAllPlayerSetMaxHealth()) {
+            if (!(player.isOp()) && !(player.hasPermission("dp.setMaxHealth")) && !plugin.getConfigManager().isPermissionAllPlayerSetMaxHealth()) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -55,13 +55,15 @@ public class SetMaxHealthCommand implements CommandExecutor {
         }
 
         if (targetPlayer == null) {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(targetPlayerName));
-            if (!offlinePlayer.hasPlayedBefore()) {
-                sender.sendMessage("§cPlayer not found.");
-                return false;
+            if (plugin.getConfigManager().isValidUUID(targetPlayerName)) {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(targetPlayerName));
+                if (!offlinePlayer.hasPlayedBefore()) {
+                    sender.sendMessage("§cPlayer not found.");
+                    return false;
+                }
+                HealthManager.setOfflinePlayerMaxHealth(newHealth, offlinePlayer);
+                sender.sendMessage("§fSet§b " + offlinePlayer.getName() + "'s§f health to§d " + newHealth);
             }
-            HealthManager.setOfflinePlayerMaxHealth(newHealth, offlinePlayer);
-            sender.sendMessage("§fSet§b " + offlinePlayer.getName() + "'s§f health to§d " + newHealth);
         } else {
             HealthManager.setMaxHealth(newHealth, targetPlayer);
             targetPlayer.sendMessage("§bYour§f health has been set to§d " + newHealth + "§b by an admin.");

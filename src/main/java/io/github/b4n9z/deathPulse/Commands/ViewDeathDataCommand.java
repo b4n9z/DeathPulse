@@ -10,16 +10,20 @@ import org.bukkit.entity.Player;
 import java.util.Set;
 import java.util.UUID;
 
-public class ViewDeathData implements CommandExecutor {
+public class ViewDeathDataCommand implements CommandExecutor {
 
     private final DeathPulse plugin;
 
-    public ViewDeathData(DeathPulse plugin) {
+    public ViewDeathDataCommand(DeathPulse plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length != 1) {
+            sender.sendMessage("§fUsage:§c /DeathPulse§b viewDeathData");
+            return true;
+        }
         if (sender instanceof Player player){
             if (player.isOp() || player.hasPermission("dp.viewDeathData") || plugin.getConfigManager().isPermissionAllPlayerViewDeathData()) {
                 double currentHealth = HealthManager.getHealth(player);

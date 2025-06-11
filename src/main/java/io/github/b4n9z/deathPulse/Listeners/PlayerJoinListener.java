@@ -22,5 +22,20 @@ public class PlayerJoinListener implements Listener {
             HealthManager.setMaxHealth(plugin.getConfigManager().getHPStart(), player);
             HealthManager.healPlayer(player);
         }
+
+        boolean status = false;
+        for (String deathType: plugin.getConfigManager().getPriority()) {
+            if (deathType.equalsIgnoreCase("IGNORE")) {
+                status = plugin.getDayManager().processDayTypePerPlayer(player, "ignored");
+            } else if (deathType.equalsIgnoreCase("INCREASE")) {
+                status = plugin.getDayManager().processDayTypePerPlayer(player, "increase");
+            } else if (deathType.equalsIgnoreCase("DECREASE")) {
+                status = plugin.getDayManager().processDayTypePerPlayer(player, "decrease");
+            }
+
+            if (status) break;
+        }
+
+        plugin.getDayManager().processDayTypePerPlayer(player, "season");
     }
 }

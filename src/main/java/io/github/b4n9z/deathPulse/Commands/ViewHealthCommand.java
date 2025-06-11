@@ -23,7 +23,7 @@ public class ViewHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) || !(player.hasPermission("dp.viewHealth")) || !plugin.getConfigManager().isPermissionAllPlayerViewHealth()) {
+            if (!(player.isOp()) && !(player.hasPermission("dp.viewHealth")) && !plugin.getConfigManager().isPermissionAllPlayerViewHealth()) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -50,6 +50,9 @@ public class ViewHealthCommand implements CommandExecutor {
 
         UUID targetUUID = targetPlayer.getUniqueId();
         Set<String> deathData = plugin.getDeathDataManager().loadPlayerDeaths(targetUUID);
+        int debt = plugin.getDebtDataManager().getDebt(targetUUID);
+
+        sender.sendMessage("§b" + targetPlayer.getName() + "§f has§d " + debt + "§f debt.");
 
         if (deathData.isEmpty()) {
             sender.sendMessage("§b" + targetPlayer.getName() + "§c has no recorded§f death data.");
