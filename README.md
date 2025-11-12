@@ -127,6 +127,7 @@ The configuration file (`config.yml`) allows you to customize various aspects of
 
 ```yaml
 ############ CRUCIAL SETTINGS ############
+config-version: 1 # Config version, don't change this section if you don't know what you are doing
 firstTimeSetup: 0 # First day Plugin setup in this server, don't change this section if you don't know what you are doing
 checkDayPeriod: 30 # Day check period in this server(in seconds), lower value is more accurate but may cause lag
 ############ WORLD SETTINGS ############
@@ -170,7 +171,8 @@ ignore: # Ignore death
     - ALL # Ignore all death type
     #- LAVA
     #- FALL
-    #- etc
+    #- etc.
+    # Add ::EXCLUDE in back of death type to exclude that death type
   day: # Ignored day settings
     enabled: false # true or false, when true, ignored day is active
     must_difference: false # (true/false) when true, player who had died with ignore day cause before, cannot ignore with same day cause again
@@ -185,7 +187,8 @@ ignore: # Ignore death
       - ALL # Ignore all death type
       #- LAVA
       #- FALL
-      #- etc
+      #- etc.
+      # Add ::EXCLUDE in back of death type to exclude that death type
 ############ INCREASE DEATH SETTINGS ############
 increase: # Increase HP player when they die
   enabled: true # true or false, when true, player can increase their HP
@@ -195,7 +198,8 @@ increase: # Increase HP player when they die
     - ALL::2 # Increase all death type
     #- LAVA::4
     - FALL::1 # If using ALL but need custom increase amount for some death type, you can add below like this
-    # - etc
+    # - etc.
+    # Change the number to EXCLUDE in back of death type to exclude that death type (Ex LAVA::EXCLUDE)
   day: # Increase day settings
     enabled: false # true or false, when true, increase day is active
     must_difference: true # (true/false) when true, player who had died with increase day cause before, cannot increase with same day cause again
@@ -210,7 +214,8 @@ increase: # Increase HP player when they die
       - ALL::10 # Increase all death type
       - LAVA::14 # If using ALL but need custom increase day amount for some death type, you can add below like this
       #- FALL::4
-      # - etc
+      # - etc.
+      # Change the number to EXCLUDE in back of death type to exclude that death type (Ex LAVA::EXCLUDE)
 ############ DECREASE DEATH SETTINGS ############
 decrease: #decrease HP player when death with certain type
   enabled: false # true or false, when true, player can decrease their HP
@@ -220,8 +225,9 @@ decrease: #decrease HP player when death with certain type
   cause: # Decrease death type and Decrease amount, (TYPE::AMOUNT)
     - ALL::4 # Decrease all death type
     - PLAYER_ATTACK::6 # If using ALL but need custom decrease amount for some death type, you can add below like this
-    #- FALL::10
-    #- etc
+    - FALL::EXCLUDE
+    #- etc.
+    # Change the number to EXCLUDE in back of death type to exclude that death type (Ex PLAYER_ATTACK::EXCLUDE)
   day: # Decrease day settings
     enabled: false # true or false, when true, decrease day is active
     must_difference: false # (true/false) when true, player who had died with decrease day cause before, cannot decrease with same day cause again
@@ -235,8 +241,9 @@ decrease: #decrease HP player when death with certain type
     cause: # Decrease day cause (death type and decrease amount), (TYPE::AMOUNT)
       - ALL::16 # Decrease all death type
       - PLAYER_ATTACK::18 # If using ALL but need custom decrease day amount for some death type, you can add below like this
-      #- FALL::20
-      #- etc
+      #- FALL::EXCLUDE
+      #- etc.
+      # Change the number to EXCLUDE in back of death type to exclude that death type (Ex PLAYER_ATTACK::EXCLUDE)
 
 ############ SEASON SETTINGS ############
 season: # Season settings, add season days to death data player, so player can death with same cause again when season change
@@ -251,6 +258,7 @@ permissionsAllPlayer: # Give permission to all player, OP can use command withou
   setMaxHealth: false # allow setMaxHealth command to all player
   viewHealth: false # allow viewHealth command to all player
   viewDeathData: true # allow viewDeathData command to all player
+  viewDebtData: true # allow viewDebtData command to all player
   resetHealth: false # allow resetHealth command to all player
   matchHealth: false # allow matchHealth command to all player
   removeDeathData: false # allow removeDeathData command to all player
@@ -304,6 +312,7 @@ notifications:
 - **Ignore, Increase, and Decrease Death Types**: Specify certain death types to ignore, increase, or decrease health.
 - **All Type Death Ignoring, Increasing, and Decreasing**: Use `ALL` to ignore, increase, or decrease health for all death causes.
 - **Increase and Decrease Amount**: Specify Amount to increase or decrease health on certain death types.
+- **Ignore, Increase, and Decrease Exclude Death Type**: EXCLUDE some death causes from being used in certain death types.
 - **Day Ignored, Increase, and Decrease**: Allows configuration of specific days when death ignore, increase, and decrease is active, regardless of the cause of death with some settings. If you only want to decrease health on specified days without affecting player health on other days, set `per_death` in the `increase` or `decrease` settings to 0.
 - **DeActive Another Death In Certain Days**: Allow deactivating another death type in certain days.
 - **Same Way Death**: If it must difference is false, and the death is the same as the last death, the player will not increase or decrease health again.
@@ -334,9 +343,9 @@ notifications:
 
 ## Contributing
 Contributions are welcome! <!-- Please read the [CONTRIBUTING.md](#) to get started. -->
-<!--
+
 ## License
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details. -->
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 

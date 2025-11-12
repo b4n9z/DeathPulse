@@ -97,7 +97,7 @@ decrease: #decrease HP player when death with certain type
   cause: # Decrease death type and Decrease amount, (TYPE::AMOUNT)
     - ALL::4 # Decrease all death type
     - PLAYER_ATTACK::6 # If using ALL but need custom decrease amount for some death type, you can add below like this
-    #- FALL::10
+    - FALL::EXCLUDE
     #- etc.
     # Change the number to EXCLUDE in back of death type to exclude that death type (Ex PLAYER_ATTACK::EXCLUDE)
   day: # Decrease day settings
@@ -113,7 +113,7 @@ decrease: #decrease HP player when death with certain type
     cause: # Decrease day cause (death type and decrease amount), (TYPE::AMOUNT)
       - ALL::16 # Decrease all death type
       - PLAYER_ATTACK::18 # If using ALL but need custom decrease day amount for some death type, you can add below like this
-      #- FALL::20
+      #- FALL::EXCLUDE
       #- etc.
       # Change the number to EXCLUDE in back of death type to exclude that death type (Ex PLAYER_ATTACK::EXCLUDE)
 
