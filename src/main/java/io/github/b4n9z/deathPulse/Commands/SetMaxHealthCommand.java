@@ -22,7 +22,7 @@ public class SetMaxHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.setMaxHealth")) && !plugin.getConfigManager().isPermissionAllPlayerSetMaxHealth()) {
+            if (!plugin.getConfigManager().canUse(player, "setMaxHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

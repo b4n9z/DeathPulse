@@ -106,12 +106,12 @@ public class DayManager {
             world.setTime(0);
         }
 
-        String dayKey = type + "_" + getCurrentDay(world, getTypeDays(type));
         String message = getWarningMessage(type);
-
-        if (message == null) {
+        if (message == null || message.isEmpty()) {
             return false;
         }
+
+        String dayKey = type + "_" + getCurrentDay(world, getTypeDays(type));
 
         // Process players in batches
         List<Player> players = new ArrayList<>(world.getPlayers());
@@ -143,13 +143,13 @@ public class DayManager {
 
             if (shouldSkipDayType(type, isIgnoredDay, isIncreaseDay, isDecreaseDay)) return false;
 
-            String dayKey = type + "_" + getCurrentDay(world, getTypeDays(type));
-            if (hasBeenWarned(player.getUniqueId(), dayKey)) {
+            String message = getWarningMessage(type);
+            if (message == null || message.isEmpty()) {
                 return false;
             }
 
-            String message = getWarningMessage(type);
-            if (message == null) {
+            String dayKey = type + "_" + getCurrentDay(world, getTypeDays(type));
+            if (hasBeenWarned(player.getUniqueId(), dayKey)) {
                 return false;
             }
 
@@ -273,4 +273,7 @@ public class DayManager {
         };
     }
 
+    public void clearLastCheckedDay(){
+        lastCheckedDay.clear();
+    }
 }

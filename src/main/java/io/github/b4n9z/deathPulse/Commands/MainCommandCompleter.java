@@ -23,43 +23,43 @@ public class MainCommandCompleter implements TabCompleter {
         List<String> commands = new ArrayList<>();
 
         if (args.length == 1) {
-            if (sender.hasPermission("dp.reload") || plugin.getConfigManager().isPermissionAllPlayerReload()) {
+            if (plugin.getConfigManager().canUse(sender, "reload")) {
                 commands.add("reload");
             }
-            if (sender.hasPermission("dp.setConfig") || plugin.getConfigManager().isPermissionAllPlayerSetConfig()) {
+            if (plugin.getConfigManager().canUse(sender, "setConfig")) {
                 commands.add("setConfig");
             }
-            if (sender.hasPermission("dp.setMaxHealth") || plugin.getConfigManager().isPermissionAllPlayerSetMaxHealth()) {
+            if (plugin.getConfigManager().canUse(sender, "setMaxHealth")) {
                 commands.add("setMaxHealth");
             }
-            if (sender.hasPermission("dp.viewHealth") || plugin.getConfigManager().isPermissionAllPlayerViewHealth()) {
+            if (plugin.getConfigManager().canUse(sender, "viewHealth")) {
                 commands.add("viewHealth");
             }
-            if (sender.hasPermission("dp.viewDeathData") || plugin.getConfigManager().isPermissionAllPlayerViewDeathData()) {
+            if (plugin.getConfigManager().canUse(sender, "viewDeathData")) {
                 commands.add("viewDeathData");
             }
-            if (sender.hasPermission("dp.viewDebtData") || plugin.getConfigManager().isPermissionAllPlayerViewDebtData()) {
+            if (plugin.getConfigManager().canUse(sender, "viewDebtData")) {
                 commands.add("viewDebtData");
             }
-            if (sender.hasPermission("dp.resetHealth") || plugin.getConfigManager().isPermissionAllPlayerResetHealth()) {
+            if (plugin.getConfigManager().canUse(sender, "resetHealth")) {
                 commands.add("resetHealth");
             }
-            if (sender.hasPermission("dp.matchHealth") || plugin.getConfigManager().isPermissionAllPlayerMatchHealth()) {
+            if (plugin.getConfigManager().canUse(sender, "matchHealth")) {
                 commands.add("matchHealth");
             }
-            if (sender.hasPermission("dp.removeDeathData") || plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
+            if (plugin.getConfigManager().canUse(sender, "removeDeathData")) {
                 commands.add("removeDeathData");
             }
-            if (sender.hasPermission("dp.removeDebtData") || plugin.getConfigManager().isPermissionAllPlayerRemoveDebtData()) {
+            if (plugin.getConfigManager().canUse(sender, "removeDebtData")) {
                 commands.add("removeDebtData");
             }
-            if (sender.hasPermission("dp.transferHealth") || plugin.getConfigManager().isPermissionAllPlayerTransferHealth()) {
+            if (plugin.getConfigManager().canUse(sender, "transferHealth")) {
                 commands.add("transferHealth");
             }
-            if (sender.hasPermission("dp.withdrawHealth") || plugin.getConfigManager().isPermissionAllPlayerWithdrawHealth()) {
+            if (plugin.getConfigManager().canUse(sender, "withdrawHealth")) {
                 commands.add("withdrawHealth");
             }
-            if (sender.hasPermission("dp.help") || plugin.getConfigManager().isPermissionAllPlayerHelp()) {
+            if (plugin.getConfigManager().canUse(sender, "help")) {
                 commands.add("help");
             }
             for (String commandOption : commands) {

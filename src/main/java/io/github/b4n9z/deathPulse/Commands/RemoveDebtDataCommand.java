@@ -25,7 +25,7 @@ public class RemoveDebtDataCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         TransactionManager.closeTransaction(sender);
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDebtData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDebtData()) {
+            if (!plugin.getConfigManager().canUse(player, "dp.removeDebtData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -108,7 +108,7 @@ public class RemoveDebtDataCommand implements CommandExecutor {
 
     public boolean confirmRemoveDebtData(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDebtData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDebtData()) {
+            if (!plugin.getConfigManager().canUse(player, "removeDebtData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -138,7 +138,7 @@ public class RemoveDebtDataCommand implements CommandExecutor {
 
     public boolean confirmRemoveAllDebtData(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDebtData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDebtData()) {
+            if (!plugin.getConfigManager().canUse(player, "removeDebtData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -167,7 +167,7 @@ public class RemoveDebtDataCommand implements CommandExecutor {
 
     public boolean cancelRemoveDebtData(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDebtData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDebtData()) {
+            if (!plugin.getConfigManager().canUse(player, "removeDebtData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

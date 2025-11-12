@@ -19,7 +19,7 @@ public class WithdrawHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.withdrawHealth")) && !plugin.getConfigManager().isPermissionAllPlayerWithdrawHealth()) {
+            if (!plugin.getConfigManager().canUse(player, "withdrawHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

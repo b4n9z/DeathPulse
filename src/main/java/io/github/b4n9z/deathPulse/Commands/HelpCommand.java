@@ -18,7 +18,7 @@ public class HelpCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.help")) && !plugin.getConfigManager().isPermissionAllPlayerHelp()) {
+            if (!plugin.getConfigManager().canUse(player, "help")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

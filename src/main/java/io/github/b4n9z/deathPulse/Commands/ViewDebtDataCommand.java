@@ -24,7 +24,7 @@ public class ViewDebtDataCommand implements CommandExecutor {
             return true;
         }
         if (sender instanceof Player player){
-            if (player.isOp() || player.hasPermission("dp.viewDebtData") || plugin.getConfigManager().isPermissionAllPlayerViewDebtData()) {
+            if (plugin.getConfigManager().canUse(player, "viewDebtData")) {
                 double currentHealth = HealthManager.getHealth(player);
                 double maxPlayerHealth = HealthManager.getMaxHealth(player);
 

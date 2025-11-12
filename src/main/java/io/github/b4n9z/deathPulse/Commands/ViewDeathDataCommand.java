@@ -25,7 +25,7 @@ public class ViewDeathDataCommand implements CommandExecutor {
             return true;
         }
         if (sender instanceof Player player){
-            if (player.isOp() || player.hasPermission("dp.viewDeathData") || plugin.getConfigManager().isPermissionAllPlayerViewDeathData()) {
+            if (plugin.getConfigManager().canUse(player, "viewDeathData")) {
                 double currentHealth = HealthManager.getHealth(player);
                 double maxPlayerHealth = HealthManager.getMaxHealth(player);
 

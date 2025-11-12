@@ -25,7 +25,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         TransactionManager.closeTransaction(sender);
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDeathData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
+            if (!plugin.getConfigManager().canUse(player, "removeDeathData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -108,7 +108,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
 
     public boolean confirmRemoveDeathData(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDeathData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
+            if (!plugin.getConfigManager().canUse(player, "removeDeathData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -138,7 +138,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
 
     public boolean confirmRemoveAllDeathData(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDeathData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
+            if (!plugin.getConfigManager().canUse(player, "removeDeathData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -167,7 +167,7 @@ public class RemoveDeathDataCommand implements CommandExecutor {
 
     public boolean cancelRemoveDeathData(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.removeDeathData")) && !plugin.getConfigManager().isPermissionAllPlayerRemoveDeathData()) {
+            if (!plugin.getConfigManager().canUse(player, "removeDeathData")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

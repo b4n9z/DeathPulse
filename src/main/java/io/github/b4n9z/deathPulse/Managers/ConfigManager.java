@@ -2,6 +2,7 @@ package io.github.b4n9z.deathPulse.Managers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 
@@ -10,6 +11,7 @@ import java.util.*;
 public class ConfigManager {
     private final Plugin plugin;
     // Crucial settings
+    private int configVersion;
     private int firstTimeSetup;
     private int checkDayPeriod;
     // World settings
@@ -38,6 +40,7 @@ public class ConfigManager {
     private boolean ignoredEnabled;
     private boolean ignoredMustDifference;
     private List<String> ignoredCause;
+    private List<String> ignoredCauseExclude;
     private boolean ignoredDayEnabled;
     private boolean ignoredDayMustDifference;
     private boolean ignoredDayDeActiveIncreaseCause;
@@ -47,12 +50,14 @@ public class ConfigManager {
     private String ignoredDayType;
     private List<Integer> ignoredDays;
     private List<String> ignoredDayCause;
+    private List<String> ignoredDayCauseExclude;
 
     // Increase settings
     private boolean increaseEnabled;
     private boolean increaseMustDifference;
     private Map<String, Integer> increaseCause;
     private List<String> increaseCauseName;
+    private List<String> increaseCauseExclude;
     private boolean increaseDayEnabled;
     private boolean increaseDayMustDifference;
     private boolean increaseDayDeActiveIgnoreCause;
@@ -63,6 +68,7 @@ public class ConfigManager {
     private List<Integer> increaseDays;
     private Map<String, Integer> increaseDayCause;
     private List<String> increaseDayCauseName;
+    private List<String> increaseDayCauseExclude;
 
     // Decrease settings
     private boolean decreaseEnabled;
@@ -70,6 +76,7 @@ public class ConfigManager {
     private boolean decreaseDebt;
     private Map<String, Integer> decreaseCause;
     private List<String> decreaseCauseName;
+    private List<String> decreaseCauseExclude;
     private boolean decreaseDayEnabled;
     private boolean decreaseDayMustDifference;
     private boolean decreaseDayDeActiveIgnoreCause;
@@ -80,6 +87,7 @@ public class ConfigManager {
     private List<Integer> decreaseDays;
     private Map<String, Integer> decreaseDayCause;
     private List<String> decreaseDayCauseName;
+    private List<String> decreaseDayCauseExclude;
 
     // Season settings
     private boolean seasonEnabled;
@@ -88,19 +96,8 @@ public class ConfigManager {
     private boolean resetWorldDay;
 
     // Permission settings
-    private boolean permissionAllPlayerReload;
-    private boolean permissionAllPlayerSetConfig;
-    private boolean permissionAllPlayerSetMaxHealth;
-    private boolean permissionAllPlayerViewHealth;
-    private boolean permissionAllPlayerViewDeathData;
-    private boolean permissionAllPlayerViewDebtData;
-    private boolean permissionAllPlayerResetHealth;
-    private boolean permissionAllPlayerMatchHealth;
-    private boolean permissionAllPlayerRemoveDeathData;
-    private boolean permissionAllPlayerRemoveDebtData;
-    private boolean permissionAllPlayerTransferHealth;
-    private boolean permissionAllPlayerWithdrawHealth;
-    private boolean permissionAllPlayerHelp;
+    private final Map<String, Boolean> permissionAllPlayer = new HashMap<>();
+    private static final String PERM_PREFIX = "dp.";
 
     // Notification
     private boolean defaultDeathMessageEnabled;
@@ -143,11 +140,14 @@ public class ConfigManager {
     public ConfigManager(Plugin plugin) {
         this.plugin = plugin;
         loadConfig();
+        this.plugin.getConfig().options().copyDefaults(true);
+        this.plugin.saveConfig();
     }
 
     public void loadConfig() {
         try {
             // Crucial settings
+            this.configVersion = plugin.getConfig().getInt("config-version", 0);
             this.firstTimeSetup = plugin.getConfig().getInt("firstTimeSetup",0);
             this.checkDayPeriod = plugin.getConfig().getInt("checkDayPeriod",30);
             // World settings
@@ -197,7 +197,25 @@ public class ConfigManager {
             // Ignored settings
             this.ignoredEnabled = plugin.getConfig().getBoolean("ignore.enabled", false);
             this.ignoredMustDifference = plugin.getConfig().getBoolean("ignore.must_difference", false);
-            this.ignoredCause = plugin.getConfig().getStringList("ignore.cause");
+            this.ignoredCause = new ArrayList<>();
+            this.ignoredCauseExclude = new ArrayList<>();
+            List<String> ignoredCauseList = plugin.getConfig().getStringList("ignore.cause");
+            String causeName;
+            for (String cause : ignoredCauseList) {
+                String[] parts = cause.split("::");
+
+                if (parts.length > 2) {
+                    plugin.getLogger().warning("Invalid cause format: " + cause);
+                    continue;
+                }
+                causeName = parts[0].trim();
+
+                if (parts.length == 2 && parts[1].trim().equals("EXCLUDE")) {
+                    this.ignoredCauseExclude.add(causeName);
+                } else {
+                    this.ignoredCause.add(causeName);
+                }
+            }
             this.ignoredDayEnabled = plugin.getConfig().getBoolean("ignore.day.enabled", false);
             this.ignoredDayMustDifference = plugin.getConfig().getBoolean("ignore.day.must_difference", false);
             this.ignoredDayDeActiveIncreaseCause = plugin.getConfig().getBoolean("ignore.day.deActiveIncrease", false);
@@ -206,7 +224,24 @@ public class ConfigManager {
             this.ignoredDayDeActiveDecreaseDay = plugin.getConfig().getBoolean("ignore.day.deActiveDecreaseDay", false);
             this.ignoredDayType = plugin.getConfig().getString("ignore.day.type", "minecraft");
             this.ignoredDays = plugin.getConfig().getIntegerList("ignore.day.days");
-            this.ignoredDayCause = plugin.getConfig().getStringList("ignore.day.cause");
+            this.ignoredDayCause = new ArrayList<>();
+            this.ignoredDayCauseExclude = new ArrayList<>();
+            List<String> ignoredDayCauseList = plugin.getConfig().getStringList("ignore.day.cause");
+            for (String cause : ignoredDayCauseList) {
+                String[] parts = cause.split("::");
+
+                if (parts.length > 2) {
+                    plugin.getLogger().warning("Invalid cause format: " + cause);
+                    continue;
+                }
+                causeName = parts[0].trim();
+
+                if (parts.length == 2 && parts[1].trim().equals("EXCLUDE")) {
+                    this.ignoredDayCauseExclude.add(causeName);
+                } else {
+                    this.ignoredDayCause.add(causeName);
+                }
+            }
 
             // Increase settings
             this.increaseEnabled = plugin.getConfig().getBoolean("increase.enabled", true);
@@ -219,15 +254,31 @@ public class ConfigManager {
             }
             this.increaseCauseName = new ArrayList<>();
             this.increaseCause = new HashMap<>();
+            this.increaseCauseExclude = new ArrayList<>();
             List<String> increaseCauseList = plugin.getConfig().getStringList("increase.cause");
-            String causeName;
             int causeAmount;
             for (String cause : increaseCauseList) {
-                causeName = cause.split("::")[0];
-                causeAmount = Integer.parseInt(cause.split("::")[1]);
-                if (causeAmount < 0) causeAmount = 0;
-                this.increaseCauseName.add(causeName);
-                this.increaseCause.put(causeName, causeAmount);
+                String[] parts = cause.split("::");
+
+                if (parts.length != 2) {
+                    plugin.getLogger().warning("Invalid cause format: " + cause);
+                    continue;
+                }
+                causeName = parts[0].trim();
+
+                if (!parts[1].trim().equals("EXCLUDE")) {
+                    try {
+                        causeAmount = Integer.parseInt(parts[1].trim());
+                        if (causeAmount < 0) causeAmount = 0;
+                    } catch (NumberFormatException e) {
+                        plugin.getLogger().warning("Invalid amount in cause: " + cause);
+                        continue;
+                    }
+                    this.increaseCauseName.add(causeName);
+                    this.increaseCause.put(causeName, causeAmount);
+                } else {
+                    this.increaseCauseExclude.add(causeName);
+                }
             }
             this.increaseDayEnabled = plugin.getConfig().getBoolean("increase.day.enabled", false);
             this.increaseDayMustDifference = plugin.getConfig().getBoolean("increase.day.must_difference", false);
@@ -245,13 +296,30 @@ public class ConfigManager {
             }
             this.increaseDayCauseName = new ArrayList<>();
             this.increaseDayCause = new HashMap<>();
+            this.increaseDayCauseExclude = new ArrayList<>();
             List<String> increaseDayCauseList = plugin.getConfig().getStringList("increase.day.cause");
             for (String cause : increaseDayCauseList) {
-                causeName = cause.split("::")[0];
-                causeAmount = Integer.parseInt(cause.split("::")[1]);
-                if (causeAmount < 0) causeAmount = 0;
-                this.increaseDayCauseName.add(causeName);
-                this.increaseDayCause.put(causeName, causeAmount);
+                String[] parts = cause.split("::");
+
+                if (parts.length != 2) {
+                    plugin.getLogger().warning("Invalid cause format: " + cause);
+                    continue;
+                }
+                causeName = parts[0].trim();
+
+                if (!parts[1].trim().equals("EXCLUDE")) {
+                    try {
+                        causeAmount = Integer.parseInt(parts[1].trim());
+                        if (causeAmount < 0) causeAmount = 0;
+                    } catch (NumberFormatException e) {
+                        plugin.getLogger().warning("Invalid amount in cause: " + cause);
+                        continue;
+                    }
+                    this.increaseDayCauseName.add(causeName);
+                    this.increaseDayCause.put(causeName, causeAmount);
+                } else {
+                    this.increaseDayCauseExclude.add(causeName);
+                }
             }
 
             // Decrease settings
@@ -266,13 +334,29 @@ public class ConfigManager {
             }
             this.decreaseCauseName = new ArrayList<>();
             this.decreaseCause = new HashMap<>();
+            this.decreaseCauseExclude = new ArrayList<>();
             List<String> decreaseCauseList = plugin.getConfig().getStringList("decrease.cause");
             for (String cause : decreaseCauseList) {
-                causeName = cause.split("::")[0];
-                causeAmount = Integer.parseInt(cause.split("::")[1]);
-                if (causeAmount < 0) causeAmount = 0;
-                this.decreaseCauseName.add(causeName);
-                this.decreaseCause.put(causeName, causeAmount);
+                String[] parts = cause.split("::");
+
+                if (parts.length != 2) {
+                    plugin.getLogger().warning("Invalid cause format: " + cause);
+                }
+                causeName = parts[0];
+
+                if (!parts[1].trim().equals("EXCLUDE")) {
+                    try {
+                        causeAmount = Integer.parseInt(parts[1]);
+                        if (causeAmount < 0) causeAmount = 0;
+                    } catch (NumberFormatException e) {
+                        plugin.getLogger().warning("Invalid amount in cause: " + cause);
+                        continue;
+                    }
+                    this.decreaseCauseName.add(causeName);
+                    this.decreaseCause.put(causeName, causeAmount);
+                } else {
+                    this.decreaseCauseExclude.add(causeName);
+                }
             }
             this.decreaseDayEnabled = plugin.getConfig().getBoolean("decrease.day.enabled", false);
             this.decreaseDayMustDifference = plugin.getConfig().getBoolean("decrease.day.must_difference", false);
@@ -290,13 +374,30 @@ public class ConfigManager {
             }
             this.decreaseDayCauseName = new ArrayList<>();
             this.decreaseDayCause = new HashMap<>();
+            this.decreaseDayCauseExclude = new ArrayList<>();
             List<String> decreaseDayCauseList = plugin.getConfig().getStringList("decrease.day.cause");
             for (String cause : decreaseDayCauseList) {
-                causeName = cause.split("::")[0];
-                causeAmount = Integer.parseInt(cause.split("::")[1]);
-                if (causeAmount < 0) causeAmount = 0;
-                this.decreaseDayCauseName.add(causeName);
-                this.decreaseDayCause.put(causeName, causeAmount);
+                String[] parts = cause.split("::");
+
+                if (parts.length != 2){
+                    plugin.getLogger().warning("Invalid cause format: " + cause);
+                    continue;
+                }
+                causeName = parts[0];
+
+                if (!parts[1].trim().equals("EXCLUDE")) {
+                    try {
+                        causeAmount = Integer.parseInt(parts[1]);
+                        if (causeAmount < 0) causeAmount = 0;
+                    } catch (NumberFormatException e) {
+                        plugin.getLogger().warning("Invalid amount in cause: " + cause);
+                        continue;
+                    }
+                    this.decreaseDayCauseName.add(causeName);
+                    this.decreaseDayCause.put(causeName, causeAmount);
+                } else {
+                    this.decreaseDayCauseExclude.add(causeName);
+                }
             }
 
             // Season settings
@@ -306,19 +407,19 @@ public class ConfigManager {
             this.resetWorldDay = plugin.getConfig().getBoolean("season.resetWorldDay", false);
 
             // Permission settings
-            this.permissionAllPlayerReload = plugin.getConfig().getBoolean("permissionsAllPlayer.reload", false);
-            this.permissionAllPlayerSetConfig = plugin.getConfig().getBoolean("permissionsAllPlayer.setConfig", false);
-            this.permissionAllPlayerSetMaxHealth = plugin.getConfig().getBoolean("permissionsAllPlayer.setMaxHealth", false);
-            this.permissionAllPlayerViewHealth = plugin.getConfig().getBoolean("permissionsAllPlayer.viewHealth", false);
-            this.permissionAllPlayerViewDeathData = plugin.getConfig().getBoolean("permissionsAllPlayer.viewDeathData", true);
-            this.permissionAllPlayerViewDebtData = plugin.getConfig().getBoolean("permissionsAllPlayer.viewDebtData", true);
-            this.permissionAllPlayerResetHealth = plugin.getConfig().getBoolean("permissionsAllPlayer.resetHealth", false);
-            this.permissionAllPlayerMatchHealth = plugin.getConfig().getBoolean("permissionsAllPlayer.matchHealth", false);
-            this.permissionAllPlayerRemoveDeathData = plugin.getConfig().getBoolean("permissionsAllPlayer.removeDeathData", false);
-            this.permissionAllPlayerRemoveDebtData = plugin.getConfig().getBoolean("permissionsAllPlayer.removeDebtData", false);
-            this.permissionAllPlayerTransferHealth = plugin.getConfig().getBoolean("permissionsAllPlayer.transferHealth", false);
-            this.permissionAllPlayerWithdrawHealth = plugin.getConfig().getBoolean("permissionsAllPlayer.withdrawHealth", false);
-            this.permissionAllPlayerHelp = plugin.getConfig().getBoolean("permissionsAllPlayer.help", true);
+            this.permissionAllPlayer.put("reload", plugin.getConfig().getBoolean("permissionsAllPlayer.reload", false));
+            this.permissionAllPlayer.put("setConfig", plugin.getConfig().getBoolean("permissionsAllPlayer.setConfig", false));
+            this.permissionAllPlayer.put("setMaxHealth", plugin.getConfig().getBoolean("permissionsAllPlayer.setMaxHealth", false));
+            this.permissionAllPlayer.put("viewHealth", plugin.getConfig().getBoolean("permissionsAllPlayer.viewHealth", false));
+            this.permissionAllPlayer.put("viewDeathData", plugin.getConfig().getBoolean("permissionsAllPlayer.viewDeathData", true));
+            this.permissionAllPlayer.put("viewDebtData", plugin.getConfig().getBoolean("permissionsAllPlayer.viewDebtData", true));
+            this.permissionAllPlayer.put("resetHealth", plugin.getConfig().getBoolean("permissionsAllPlayer.resetHealth", false));
+            this.permissionAllPlayer.put("matchHealth", plugin.getConfig().getBoolean("permissionsAllPlayer.matchHealth", false));
+            this.permissionAllPlayer.put("removeDeathData", plugin.getConfig().getBoolean("permissionsAllPlayer.removeDeathData", false));
+            this.permissionAllPlayer.put("removeDebtData", plugin.getConfig().getBoolean("permissionsAllPlayer.removeDebtData", false));
+            this.permissionAllPlayer.put("transferHealth", plugin.getConfig().getBoolean("permissionsAllPlayer.transferHealth", true));
+            this.permissionAllPlayer.put("withdrawHealth", plugin.getConfig().getBoolean("permissionsAllPlayer.withdrawHealth", true));
+            this.permissionAllPlayer.put("help", plugin.getConfig().getBoolean("permissionsAllPlayer.help", true));
 
             // Notification
             this.defaultDeathMessageEnabled = plugin.getConfig().getBoolean("notifications.defaultDeathMessage", false);
@@ -404,6 +505,7 @@ public class ConfigManager {
 
         if (resetWorldDay && !seasonEnabled) throw new Exception("season.enabled should be true when resetWorldDay is true:§e " + false);
 
+        /*
         if (ignoredEnabled && !ignoredMustDifference) {
             Set<String> intersectionIgnore = new HashSet<>(ignoredCause);
             intersectionIgnore.retainAll(ignoredDayCause);
@@ -502,6 +604,11 @@ public class ConfigManager {
                 throw new Exception("decrease.day.days should not have common elements with ignore.day.days or increase.day.days:§e " + String.join(", ", intersectionDecreaseDays.stream().map(String::valueOf).toArray(String[]::new)));
             }
         }
+        */
+    }
+
+    public int getConfigVersion() {
+        return configVersion;
     }
 
     public int getFirstTimeSetup() {
@@ -607,6 +714,9 @@ public class ConfigManager {
     public List<String> getIgnoredCause() {
         return ignoredCause;
     }
+    public List<String> getIgnoredCauseExclude() {
+        return ignoredCauseExclude;
+    }
     public boolean isIgnoredDayEnabled() {
         return ignoredDayEnabled;
     }
@@ -634,6 +744,9 @@ public class ConfigManager {
     public List<String> getIgnoredDayCause() {
         return ignoredDayCause;
     }
+    public List<String> getIgnoredDayCauseExclude() {
+        return ignoredDayCauseExclude;
+    }
 
     public boolean isIncreaseEnabled() {
         return increaseEnabled;
@@ -645,10 +758,13 @@ public class ConfigManager {
         return increaseCause;
     }
     public boolean isIncreaseCauseValid(String cause) {
-        return increaseCause.containsKey(cause);
+        return increaseCause.containsKey(cause) && !increaseCauseExclude.contains(cause);
     }
     public List<String> getIncreaseCauseName() {
         return increaseCauseName;
+    }
+    public List<String> getIncreaseCauseExclude() {
+        return increaseCauseExclude;
     }
     public Integer getIncreaseCauseAmount(String cause) {
         return increaseCause.get(cause);
@@ -681,7 +797,10 @@ public class ConfigManager {
         return increaseDayCause;
     }
     public boolean isIncreaseDayCauseValid(String cause) {
-        return increaseDayCause.containsKey(cause);
+        return increaseDayCause.containsKey(cause) && !increaseDayCauseExclude.contains(cause);
+    }
+    public List<String> getIncreaseDayCauseExclude() {
+        return increaseDayCauseExclude;
     }
     public List<String> getIncreaseDayCauseName() {
         return increaseDayCauseName;
@@ -703,10 +822,13 @@ public class ConfigManager {
         return decreaseCause;
     }
     public boolean isDecreaseCauseValid(String cause) {
-        return decreaseCause.containsKey(cause);
+        return decreaseCause.containsKey(cause) && !decreaseCauseExclude.contains(cause);
     }
     public List<String> getDecreaseCauseName() {
         return decreaseCauseName;
+    }
+    public List<String> getDecreaseCauseExclude() {
+        return decreaseCauseExclude;
     }
     public Integer getDecreaseCauseAmount(String cause) {
         return decreaseCause.get(cause);
@@ -739,7 +861,10 @@ public class ConfigManager {
         return decreaseDayCause;
     }
     public boolean isDecreaseDayCauseValid(String cause) {
-        return decreaseDayCause.containsKey(cause);
+        return decreaseDayCause.containsKey(cause) && !decreaseDayCauseExclude.contains(cause);
+    }
+    public List<String> getDecreaseDayCauseExclude() {
+        return decreaseDayCauseExclude;
     }
     public List<String> getDecreaseDayCauseName() {
         return decreaseDayCauseName;
@@ -750,17 +875,17 @@ public class ConfigManager {
 
     // Check if death cause is ignored
     public boolean isIgnoredCause(String deathCause) {
-        return (ignoredEnabled && (ignoredCause.contains("ALL") || ignoredCause.contains(deathCause)));
+        return (ignoredEnabled && (ignoredCause.contains("ALL") || ignoredCause.contains(deathCause)) && !ignoredCauseExclude.contains(deathCause));
     }
 
     // Check if death cause is increase
     public boolean isIncreaseCause(String deathCause) {
-        return (increaseEnabled && (isIncreaseCauseValid("ALL") || isIncreaseCauseValid(deathCause)));
+        return (increaseEnabled && (isIncreaseCauseValid("ALL") || isIncreaseCauseValid(deathCause)) && !increaseCauseExclude.contains(deathCause));
     }
 
     // Check if death cause is decrease
     public boolean isDecreaseCause(String deathCause) {
-        return (decreaseEnabled && (isDecreaseCauseValid("ALL") || isDecreaseCauseValid(deathCause)));
+        return (decreaseEnabled && (isDecreaseCauseValid("ALL") || isDecreaseCauseValid(deathCause)) && !decreaseCauseExclude.contains(deathCause));
     }
 
     public boolean isSeasonEnabled() {
@@ -776,44 +901,12 @@ public class ConfigManager {
         return resetWorldDay;
     }
 
-    public boolean isPermissionAllPlayerReload() {
-        return permissionAllPlayerReload;
-    }
-    public boolean isPermissionAllPlayerSetConfig() {
-        return permissionAllPlayerSetConfig;
-    }
-    public boolean isPermissionAllPlayerSetMaxHealth() {
-        return permissionAllPlayerSetMaxHealth;
-    }
-    public boolean isPermissionAllPlayerViewHealth() {
-        return permissionAllPlayerViewHealth;
-    }
-    public boolean isPermissionAllPlayerViewDeathData() {
-        return permissionAllPlayerViewDeathData;
-    }
-    public boolean isPermissionAllPlayerViewDebtData() {
-        return permissionAllPlayerViewDebtData;
-    }
-    public boolean isPermissionAllPlayerResetHealth() {
-        return permissionAllPlayerResetHealth;
-    }
-    public boolean isPermissionAllPlayerMatchHealth() {
-        return permissionAllPlayerMatchHealth;
-    }
-    public boolean isPermissionAllPlayerRemoveDeathData() {
-        return permissionAllPlayerRemoveDeathData;
-    }
-    public boolean isPermissionAllPlayerRemoveDebtData() {
-        return permissionAllPlayerRemoveDebtData;
-    }
-    public boolean isPermissionAllPlayerTransferHealth() {
-        return permissionAllPlayerTransferHealth;
-    }
-    public boolean isPermissionAllPlayerWithdrawHealth() {
-        return permissionAllPlayerWithdrawHealth;
-    }
-    public boolean isPermissionAllPlayerHelp() {
-        return permissionAllPlayerHelp;
+    public boolean canUse(CommandSender sender, String perm) {
+        if (!permissionAllPlayer.containsKey(perm)) {
+            plugin.getLogger().warning("Unknown permission key used in canUse(): " + perm);
+        }
+        if (permissionAllPlayer.getOrDefault(perm, false)) return true;
+        return sender.hasPermission(PERM_PREFIX + perm) || sender.hasPermission(PERM_PREFIX + "admin");
     }
 
     public boolean isDefaultDeathMessageEnabled() {

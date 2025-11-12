@@ -27,7 +27,7 @@ public class MatchHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.matchHealth")) && !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
+            if (!plugin.getConfigManager().canUse(player, "matchHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -107,7 +107,7 @@ public class MatchHealthCommand implements CommandExecutor {
 
     public boolean confirmMatchHealth(CommandSender sender, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.matchHealth")) && !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
+            if (!plugin.getConfigManager().canUse(player, "matchHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -173,7 +173,7 @@ public class MatchHealthCommand implements CommandExecutor {
 
     public boolean cancelMatchHealth(CommandSender sender, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.matchHealth")) && !(plugin.getConfigManager().isPermissionAllPlayerMatchHealth())) {
+            if (!plugin.getConfigManager().canUse(player, "matchHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -266,15 +266,23 @@ public class MatchHealthCommand implements CommandExecutor {
     }
 
     private boolean isCauseMatch(Set<String> causes, String deathCause, String suffix, String typeDeath) {
-        if (!deathCause.endsWith(suffix) && !typeDeath.equals("DAY")) return false;
+        if (!deathCause.endsWith(suffix) && !typeDeath.equalsIgnoreCase("IncreaseDay") && !typeDeath.equalsIgnoreCase("DecreaseDay")) return false;
 
-        if (causes.contains("ALL")) return true;
+        String baseCause = splitCause(deathCause);
+        if (causes.contains("ALL")) {
+            switch (typeDeath) {
+                case "Increase":
+                    return !plugin.getConfigManager().getIncreaseCauseExclude().contains(baseCause);
+                case "IncreaseDay":
+                    return !plugin.getConfigManager().getIncreaseDayCauseExclude().contains(baseCause);
+                case "Decrease":
+                    return !plugin.getConfigManager().getDecreaseCauseExclude().contains(baseCause);
+                case "DecreaseDay":
+                    return !plugin.getConfigManager().getDecreaseDayCauseExclude().contains(baseCause);
+            }
+        }
 
-        return causes.stream().anyMatch(cause -> {
-            int bracketIndex = deathCause.indexOf('[');
-            String deathCauseWithoutSuffix = bracketIndex != -1 ? deathCause.substring(0, bracketIndex) : deathCause;
-            return deathCauseWithoutSuffix.equals(cause);
-        });
+        return causes.contains(baseCause);
     }
 
     private String splitCause(String deathCause) {
@@ -297,10 +305,10 @@ public class MatchHealthCommand implements CommandExecutor {
         for (String deathCause : deathData) {
             String causeDeath = splitCause(deathCause);
 
-            if (plugin.getConfigManager().isIncreaseEnabled() && (isCauseMatch(increaseCause, deathCause, "[Increase]",""))){
+            if (plugin.getConfigManager().isIncreaseEnabled() && (isCauseMatch(increaseCause, deathCause, "[Increase]","Increase"))){
                 increaseHealth += plugin.getConfigManager().getIncreaseCauseAmount(causeDeath);
             }
-            if (plugin.getConfigManager().isIncreaseDayEnabled() && (isCauseMatch(increaseDayCause, deathCause, "[Increase]","DAY"))){
+            if (plugin.getConfigManager().isIncreaseDayEnabled() && (isCauseMatch(increaseDayCause, deathCause, "[Increase]","IncreaseDay"))){
                 for (int day : plugin.getConfigManager().getIncreaseDays()) {
                     if (isValidDay(deathCause, day, "increase")) {
                         increaseDaysHealth += plugin.getConfigManager().getIncreaseDayCauseAmount(causeDeath);
@@ -308,10 +316,10 @@ public class MatchHealthCommand implements CommandExecutor {
                     }
                 }
             }
-            if (plugin.getConfigManager().isDecreaseEnabled() && (isCauseMatch(decreaseCause, deathCause, "[Decrease]",""))){
+            if (plugin.getConfigManager().isDecreaseEnabled() && (isCauseMatch(decreaseCause, deathCause, "[Decrease]","Decrease"))){
                 decreaseHealth += plugin.getConfigManager().getDecreaseCauseAmount(causeDeath);
             }
-            if (plugin.getConfigManager().isDecreaseDayEnabled() && (isCauseMatch(decreaseDayCause, deathCause, "[Decrease]","DAY"))){
+            if (plugin.getConfigManager().isDecreaseDayEnabled() && (isCauseMatch(decreaseDayCause, deathCause, "[Decrease]","DecreaseDay"))){
                 for (int day : plugin.getConfigManager().getDecreaseDays()) {
                     if (isValidDay(deathCause, day, "decrease")) {
                         decreaseDaysHealth += plugin.getConfigManager().getDecreaseDayCauseAmount(causeDeath);

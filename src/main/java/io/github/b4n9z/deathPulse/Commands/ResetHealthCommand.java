@@ -24,7 +24,7 @@ public class ResetHealthCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.resetHealth")) && !plugin.getConfigManager().isPermissionAllPlayerResetHealth()){
+            if (!plugin.getConfigManager().canUse(player, "resetHealth")){
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -103,7 +103,7 @@ public class ResetHealthCommand implements CommandExecutor {
 
     public boolean confirmResetHealth(CommandSender sender, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.resetHealth")) && !plugin.getConfigManager().isPermissionAllPlayerResetHealth()){
+            if (!plugin.getConfigManager().canUse(player, "resetHealth")){
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -177,7 +177,7 @@ public class ResetHealthCommand implements CommandExecutor {
 
     public boolean cancelResetHealth(CommandSender sender, String[] args) {
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.resetHealth")) && !plugin.getConfigManager().isPermissionAllPlayerResetHealth()){
+            if (!plugin.getConfigManager().canUse(player, "resetHealth")){
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

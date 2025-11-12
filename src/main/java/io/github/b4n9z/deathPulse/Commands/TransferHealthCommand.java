@@ -24,7 +24,7 @@ public class TransferHealthCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         TransactionManager.closeTransaction(sender);
         if (sender instanceof Player player){
-            if (!(player.isOp()) && !(player.hasPermission("dp.transferHealth")) && !plugin.getConfigManager().isPermissionAllPlayerTransferHealth()) {
+            if (!plugin.getConfigManager().canUse(player, "transferHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -74,7 +74,7 @@ public class TransferHealthCommand implements CommandExecutor {
 
     public boolean confirmedTransferHealth(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.transferHealth")) && !plugin.getConfigManager().isPermissionAllPlayerTransferHealth()) {
+            if (!plugin.getConfigManager().canUse(player, "transferHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }
@@ -141,7 +141,7 @@ public class TransferHealthCommand implements CommandExecutor {
 
     public boolean cancelTransferHealth(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.transferHealth")) && !plugin.getConfigManager().isPermissionAllPlayerTransferHealth()) {
+            if (!plugin.getConfigManager().canUse(player, "transferHealth")) {
                 sender.sendMessage("§fYou§c do not have permission§f to use this command.");
                 return false;
             }

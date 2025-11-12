@@ -10,4 +10,47 @@ commands:
     aliases: [ dp ]
     usage: /dp <subcommand>
     description: Main command for the DeathPulse plugin
-    permissions: dp.admin
+
+permissions:
+  dp.admin:
+    description: Allows full access to All commands
+    default: op
+  dp.reload:
+    description: Allows to reload the plugin
+    default: op
+  dp.setConfig:
+    description: Allows to set config
+    default: op
+  dp.setMaxHealth:
+    description: Allows to set max health
+    default: op
+  dp.viewHealth:
+    description: Allows to view health and status
+    default: op
+  dp.viewDeathData:
+    description: Allows to view death data
+    default: op
+  dp.viewDebtData:
+    description: Allows to view debt data
+    default: op
+  dp.resetHealth:
+    description: Allows to reset health
+    default: op
+  dp.matchHealth:
+    description: Allows to match health
+    default: op
+  dp.removeDeathData:
+    description: Allows to remove death data
+    default: op
+  dp.removeDebtData:
+    description: Allows to remove debt data
+    default: op
+  dp.transferHealth:
+    description: Allows to transfer health
+    default: op
+  dp.withdrawHealth:
+    description: Allows to withdraw health
+    default: op
+  dp.help:
+    description: Allows to view help
+    default: op

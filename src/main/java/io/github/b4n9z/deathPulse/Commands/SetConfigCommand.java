@@ -20,7 +20,7 @@ public class SetConfigCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player player) {
-            if (!(player.isOp()) && !(player.hasPermission("dp.setConfig")) && !plugin.getConfigManager().isPermissionAllPlayerSetConfig()) {
+            if (!plugin.getConfigManager().canUse(player, "setConfig")) {
                 sender.sendMessage("§cYou do not have permission to use this command.");
                 return false;
             }

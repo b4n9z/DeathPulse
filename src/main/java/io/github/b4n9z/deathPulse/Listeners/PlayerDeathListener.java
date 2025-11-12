@@ -64,17 +64,17 @@ public class PlayerDeathListener implements Listener {
 
     // Check if ignored day
     public boolean isIgnoredDay(World world, String deathCause) {
-        return (plugin.getConfigManager().isIgnoredDayEnabled() && plugin.getDayManager().isMultipleDay(world, "ignored") && (plugin.getConfigManager().getIgnoredDayCause().contains("ALL") || plugin.getConfigManager().getIgnoredDayCause().contains(deathCause)));
+        return (plugin.getConfigManager().isIgnoredDayEnabled() && plugin.getDayManager().isMultipleDay(world, "ignored") && (plugin.getConfigManager().getIgnoredDayCause().contains("ALL") || plugin.getConfigManager().getIgnoredDayCause().contains(deathCause)) && !plugin.getConfigManager().getIgnoredDayCauseExclude().contains(deathCause));
     }
 
     // Check if increase day
     private boolean isIncreaseDay(World world, String deathCause) {
-        return (plugin.getConfigManager().isIncreaseDayEnabled() && plugin.getDayManager().isMultipleDay(world, "increase") && (plugin.getConfigManager().isIncreaseDayCauseValid("ALL") || plugin.getConfigManager().isIncreaseDayCauseValid(deathCause)));
+        return (plugin.getConfigManager().isIncreaseDayEnabled() && plugin.getDayManager().isMultipleDay(world, "increase") && (plugin.getConfigManager().isIncreaseDayCauseValid("ALL") || plugin.getConfigManager().isIncreaseDayCauseValid(deathCause)) && !plugin.getConfigManager().getIncreaseDayCauseExclude().contains(deathCause));
     }
 
     // Check if decrease day
     private boolean isDecreaseDay(World world, String deathCause) {
-        return (plugin.getConfigManager().isDecreaseDayEnabled() && plugin.getDayManager().isMultipleDay(world, "decrease") && (plugin.getConfigManager().isDecreaseDayCauseValid("ALL") || plugin.getConfigManager().isDecreaseDayCauseValid(deathCause)));
+        return (plugin.getConfigManager().isDecreaseDayEnabled() && plugin.getDayManager().isMultipleDay(world, "decrease") && (plugin.getConfigManager().isDecreaseDayCauseValid("ALL") || plugin.getConfigManager().isDecreaseDayCauseValid(deathCause)) && !plugin.getConfigManager().getDecreaseDayCauseExclude().contains(deathCause));
     }
 
     private boolean runIgnored(Player player, UUID playerUUID, World world, String season, String deathCause) {
