@@ -1,7 +1,7 @@
 name: DeathPulse
-version: '2.1.0'
+version: '2.1.1'
 main: io.github.b4n9z.deathPulse.DeathPulse
-api-version: '1.21.10'
+api-version: '1.21'
 authors: [b4n9z]
 description: Simple Plugin Increase or Decrease Health Player When They Die
 
